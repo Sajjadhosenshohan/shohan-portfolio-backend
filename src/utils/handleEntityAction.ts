@@ -20,6 +20,11 @@ const entityHandlersMap: Partial<Record<EntityType, EntityHandlers>> = {
     update: updateProject,
     delete: deleteProject,
   },
+  // message:{
+  //   create: addProject,
+  //   update: updateProject,
+  //   delete: deleteProject,
+  // }
   // blog চাইলে এখানে রাখো
   // blog: {
   //   create: addBlog,

@@ -17,62 +17,63 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { MessageDetail } from "./message-detail";
-import { useToast } from "@/hooks/use-toast";
+import { TMessage } from "@/types/message.type";
+import { deleteMessage, getMessageDetails } from "@/services/message";
 
-interface Message {
-  id: string;
-  name: string;
-  email: string;
-  message: string;
-  receivedAt: string;
-  isRead: boolean;
-}
-
-export default function MessageList() {
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [selectedMessage, setSelectedMessage] = useState<Message | null>(null);
+export default function MessageList({ messages }: { messages: TMessage[] }) {
+  // const [messages, setMessages] = useState<Message[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [selectedMessage, setSelectedMessage] = useState<TMessage | null>(null);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
-  const { toast } = useToast();
 
-  const handleDeleteMessage = (id: string) => {
-    setMessages(messages.filter(message => message.id !== id));
-    
-    toast({
-      title: "Message deleted",
-      description: "The message has been deleted successfully.",
-    });
-    
-    if (selectedMessage?.id === id) {
-      setSelectedMessage(null);
-      setIsDetailOpen(false);
+  const handleDeleteMessage = async (id: string) => {
+   try {
+      const res = await deleteMessage(id);
+      console.log("delete message", res?.data)
+      if (res.success) {
+        // setSelectedMessage(res?.data);
+        setIsDetailOpen(false);
+      } else {
+        console.log(res?.message);
+      }
+    } catch (error: any) {
+      console.log(error?.message || `Failed to delete message`);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const openMessageDetail = (message: Message) => {
-    // Mark as read
-    if (!message.isRead) {
-      setMessages(messages.map(m => 
-        m.id === message.id ? { ...m, isRead: true } : m
-      ));
+  const openMessageDetail = async (id:string) => {
+    try {
+      const res = await getMessageDetails(id);
+      console.log("message", res?.data)
+      if (res.success) {
+        setSelectedMessage(res?.data);
+        setIsDetailOpen(true);
+      } else {
+        console.log(res?.message);
+      }
+    } catch (error: any) {
+      console.log(error?.message || `Failed to get message`);
+    } finally {
+      setLoading(false);
     }
-    
-    setSelectedMessage(message);
-    setIsDetailOpen(true);
   };
 
-  const unreadCount = messages.filter(message => !message.isRead).length;
+  // const unreadCount = messages.filter(message => !message.isRead).length;
 
+  if(loading) return <div className="text center mx-auto">Loading....</div>
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h2 className="text-xl font-semibold tracking-tight">Your Messages</h2>
-        {unreadCount > 0 && (
+        {/* {unreadCount > 0 && (
           <div className="bg-primary text-primary-foreground px-2 py-1 rounded-full text-xs">
             {unreadCount} unread
           </div>
-        )}
+        )} */}
       </div>
-      
+
       {messages.length === 0 ? (
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-10 space-y-4">
@@ -87,14 +88,13 @@ export default function MessageList() {
         </Card>
       ) : (
         <div className="space-y-4">
-          {messages.map((message) => (
-            <Card 
-              key={message.id} 
+          {messages?.map((message:TMessage) => (
+            <Card
+              key={message.id}
               className={`
-                cursor-pointer hover:bg-muted/50 transition-colors
-                ${!message.isRead ? "border-l-4 border-l-primary" : ""}
+                cursor-pointer hover:bg-muted/50 transition-colors border-l-4 border-l-primary
               `}
-              onClick={() => openMessageDetail(message)}
+              onClick={() => openMessageDetail(message?.id)}
             >
               <CardContent className="p-4">
                 <div className="flex justify-between items-start">
@@ -103,9 +103,9 @@ export default function MessageList() {
                       <User className="h-4 w-4 text-muted-foreground" />
                       <h3 className="font-medium">
                         {message.name}
-                        {!message.isRead && (
+                        {/* {!message.isRead && (
                           <span className="ml-2 inline-block w-2 h-2 rounded-full bg-primary"></span>
-                        )}
+                        )} */}
                       </h3>
                     </div>
                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -114,32 +114,41 @@ export default function MessageList() {
                     </div>
                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
                       <Calendar className="h-4 w-4" />
-                      <span>{format(new Date(message.receivedAt), "PP")}</span>
+                      <span>{format(new Date(message.createdAt), "PP")}</span>
                     </div>
                   </div>
-                  <div className="flex items-center">
+                  <div className="flex items-center gap-4">
+                    <div>
+                      <Button variant={'outline'} className="cursor-pointer">See details</Button>
+                    </div>
                     <AlertDialog>
                       <AlertDialogTrigger asChild>
-                        <Button 
-                          variant="ghost" 
-                          size="icon" 
+                        <Button variant={'outline'} onClick={(e) => {
+                            e.stopPropagation();
+                          }} className="cursor-pointer">Delete</Button>
+                        {/* <Button
+                          variant="ghost"
+                          size="icon"
                           className="text-muted-foreground hover:text-destructive"
                           onClick={(e) => {
                             e.stopPropagation();
                           }}
                         >
                           <Trash2 className="h-4 w-4" />
-                        </Button>
+                        </Button> */}
                       </AlertDialogTrigger>
                       <AlertDialogContent>
                         <AlertDialogHeader>
                           <AlertDialogTitle>Delete Message</AlertDialogTitle>
                           <AlertDialogDescription>
-                            Are you sure you want to delete this message? This action cannot be undone.
+                            Are you sure you want to delete this message? This
+                            action cannot be undone.
                           </AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>
-                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogCancel onClick={(e)=> {
+                            e.stopPropagation();
+                          }}>Cancel</AlertDialogCancel>
                           <AlertDialogAction
                             className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                             onClick={() => handleDeleteMessage(message.id)}
@@ -151,16 +160,14 @@ export default function MessageList() {
                     </AlertDialog>
                   </div>
                 </div>
-                <p className="text-sm mt-2 line-clamp-2">
-                  {message.message}
-                </p>
+                <p className="text-sm mt-2 line-clamp-2">{message.message}</p>
               </CardContent>
             </Card>
           ))}
         </div>
       )}
-      
-      <MessageDetail 
+
+      <MessageDetail
         message={selectedMessage}
         open={isDetailOpen}
         onOpenChange={setIsDetailOpen}

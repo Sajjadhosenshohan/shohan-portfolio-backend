@@ -22,18 +22,10 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-
-interface Message {
-  id: string;
-  name: string;
-  email: string;
-  message: string;
-  receivedAt: string;
-  isRead: boolean;
-}
+import { TMessage } from "@/types/message.type";
 
 interface MessageDetailProps {
-  message: Message | null;
+  message: TMessage | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onDelete: (id: string) => void;
@@ -48,7 +40,7 @@ export function MessageDetail({ message, open, onOpenChange, onDelete }: Message
         <DialogHeader>
           <DialogTitle>Message from {message.name}</DialogTitle>
           <DialogDescription>
-            Received on {format(new Date(message.receivedAt), "PPP 'at' p")}
+            Received on {format(new Date(message.createdAt), "PPP 'at' p")}
           </DialogDescription>
         </DialogHeader>
         
@@ -77,7 +69,7 @@ export function MessageDetail({ message, open, onOpenChange, onDelete }: Message
               <Calendar className="h-4 w-4 mr-2" />
               Date:
             </div>
-            <div>{format(new Date(message.receivedAt), "PPP 'at' p")}</div>
+            <div>{format(new Date(message.createdAt), "PPP 'at' p")}</div>
           </div>
           
           <div className="border-t pt-4">
@@ -97,11 +89,11 @@ export function MessageDetail({ message, open, onOpenChange, onDelete }: Message
           </Button>
           
           <div className="flex gap-2">
-            <Button asChild>
+            {/* <Button asChild>
               <a href={`mailto:${message.email}`}>
                 Reply via Email
               </a>
-            </Button>
+            </Button> */}
             
             <AlertDialog>
               <AlertDialogTrigger asChild>

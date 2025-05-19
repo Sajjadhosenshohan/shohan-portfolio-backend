@@ -1,12 +1,15 @@
 import { Metadata } from "next";
 import MessageList from "@/components/dashboard/messages/message-list";
+import { getAllMessages } from "@/services/message";
 
 export const metadata: Metadata = {
   title: "Messages - Portfolio Dashboard",
   description: "View and manage contact messages",
 };
 
-export default function MessagesPage() {
+export default async function MessagesPage() {
+  const response = await getAllMessages()
+  const data = response?.data;
   return (
     <div className="space-y-6">
       <div>
@@ -15,7 +18,7 @@ export default function MessagesPage() {
           View and manage messages from your contact form
         </p>
       </div>
-      <MessageList />
+      <MessageList messages={data}/>
     </div>
   );
 }
