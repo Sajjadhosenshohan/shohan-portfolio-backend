@@ -9,7 +9,8 @@ import {
   Newspaper, 
   MessageSquare, 
   LayoutDashboard,
-  LucideIcon
+  LucideIcon,
+  Wrench
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -39,6 +40,11 @@ const navItems: NavItem[] = [
     title: "Projects",
     href: "/dashboard/projects",
     icon: FolderKanban,
+  },
+   {
+    title: "Skills",
+    href: "/dashboard/skills",
+    icon: Wrench,
   },
   {
     title: "Blog Posts",
