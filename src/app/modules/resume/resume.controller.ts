@@ -11,36 +11,35 @@ import { Request, Response } from "express";
 import axios from "axios";
 
 const addResumeIntoDB = catchAsync(async (req: Request, res: Response) => {
-  const data = JSON.parse(req?.body?.data);
-  console.log("Controller data:", data);
+  const data = req?.body;
 
-  if (req.file) {
-    const uploadsDir = path.join(process.cwd(), "public/resumes");
+  // if (req.file) {
+  //   const uploadsDir = path.join(process.cwd(), "public/resumes");
 
-    // Ensure directory exists
-    if (!fs.existsSync(uploadsDir)) {
-      try {
-        fs.mkdirSync(uploadsDir, { recursive: true });
-      } catch (error) {
-        throw new Error(
-          `Failed to create uploads directory: ${(error as Error).message}`
-        );
-      }
-    }
+  //   // Ensure directory exists
+  //   if (!fs.existsSync(uploadsDir)) {
+  //     try {
+  //       fs.mkdirSync(uploadsDir, { recursive: true });
+  //     } catch (error) {
+  //       throw new Error(
+  //         `Failed to create uploads directory: ${(error as Error).message}`
+  //       );
+  //     }
+  //   }
 
-    const uniqueFilename = `${uuidv4()}-${req.file.originalname}`;
-    const filePath = path.join(uploadsDir, uniqueFilename);
+  //   const uniqueFilename = `${uuidv4()}-${req.file.originalname}`;
+  //   const filePath = path.join(uploadsDir, uniqueFilename);
 
-    // Save file asynchronously
-    try {
-      await fs.promises.writeFile(filePath, req.file.buffer);
-      console.log("File saved at:", filePath);
-      data.pdfUrl = `/api/resumes/${uniqueFilename}`;
-      console.log("File URL sdfh:", data.pdfUrl);
-    } catch (error) {
-      throw new Error(`Failed to save file: ${(error as Error).message}`);
-    }
-  }
+  //   // Save file asynchronously
+  //   try {
+  //     await fs.promises.writeFile(filePath, req.file.buffer);
+  //     console.log("File saved at:", filePath);
+  //     data.pdfUrl = `/api/resumes/${uniqueFilename}`;
+  //     console.log("File URL sdfh:", data.pdfUrl);
+  //   } catch (error) {
+  //     throw new Error(`Failed to save file: ${(error as Error).message}`);
+  //   }
+  // }
 
   // if (req.file) {
   //      // Instead of saving to filesystem, pass the buffer to the service
@@ -79,36 +78,35 @@ const getAllResumeDataFromDB = catchAsync(async (req, res) => {
 // });
 export const updateResumeFromDB = catchAsync(
   async (req: Request, res: Response) => {
-    const data = JSON.parse(req?.body?.data);
-    console.log("Controller data:", data);
+    const data = req?.body;
 
-    if (req.file) {
-      const uploadsDir = path.join(process.cwd(), "public/resumes");
+    // if (req.file) {
+    //   const uploadsDir = path.join(process.cwd(), "public/resumes");
 
-      // Ensure directory exists
-      if (!fs.existsSync(uploadsDir)) {
-        try {
-          fs.mkdirSync(uploadsDir, { recursive: true });
-        } catch (error) {
-          throw new Error(
-            `Failed to create uploads directory: ${(error as Error).message}`
-          );
-        }
-      }
+    //   // Ensure directory exists
+    //   if (!fs.existsSync(uploadsDir)) {
+    //     try {
+    //       fs.mkdirSync(uploadsDir, { recursive: true });
+    //     } catch (error) {
+    //       throw new Error(
+    //         `Failed to create uploads directory: ${(error as Error).message}`
+    //       );
+    //     }
+    //   }
 
-      const uniqueFilename = `${uuidv4()}-${req.file.originalname}`;
-      const filePath = path.join(uploadsDir, uniqueFilename);
+    //   const uniqueFilename = `${uuidv4()}-${req.file.originalname}`;
+    //   const filePath = path.join(uploadsDir, uniqueFilename);
 
-      // Save file asynchronously
-      try {
-        await fs.promises.writeFile(filePath, req.file.buffer);
-        // console.log("File saved at:", filePath);
-        data.pdfUrl = `/api/resumes/${uniqueFilename}`;
-        // console.log("File URL sdfh:", skillInfo.pdfUrl);
-      } catch (error) {
-        throw new Error(`Failed to save file: ${(error as Error).message}`);
-      }
-    }
+    //   // Save file asynchronously
+    //   try {
+    //     await fs.promises.writeFile(filePath, req.file.buffer);
+    //     // console.log("File saved at:", filePath);
+    //     data.pdfUrl = `/api/resumes/${uniqueFilename}`;
+    //     // console.log("File URL sdfh:", skillInfo.pdfUrl);
+    //   } catch (error) {
+    //     throw new Error(`Failed to save file: ${(error as Error).message}`);
+    //   }
+    // }
     const result = await ResumeServices.updateResumeFromDB(data);
     sendResponse(res, {
       statusCode: StatusCodes.OK,

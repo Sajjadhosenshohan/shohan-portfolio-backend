@@ -17,6 +17,14 @@ const createUser = async (data: any) => {
     password: hashPassword,
   };
 
+  const existingUser = await prisma.user.findUnique({
+    where: {
+      email: userData.email,
+    },
+  });
+  if (existingUser) {
+    throw new Error('User already exists');
+  }
   const result = await prisma.user.create({
     data: userData,
   });
@@ -74,6 +82,9 @@ const getUserByIdFromDB = async (id: string): Promise<User | null> => {
       id
     },
   });
+  if (!result) {
+    throw new Error('User not found');
+  }
 
   return result;
 };

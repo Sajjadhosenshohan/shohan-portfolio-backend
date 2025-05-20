@@ -16,9 +16,9 @@ const corseOptions = {
 
 app.use(cors(corseOptions));
 // Serve static files from public/resumes
-const uploadsDir = path.join(process.cwd(), "public/resumes");
-console.log("Serving static files from:", uploadsDir);
-app.use("/api/resumes", express.static(uploadsDir));
+// const uploadsDir = path.join(process.cwd(), "public/resumes");
+// console.log("Serving static files from:", uploadsDir);
+// app.use("/api/resumes", express.static(uploadsDir));
 
 // parder
 app.use(cookieParser());

@@ -11,13 +11,13 @@ const router = express.Router();
 router.post(
   "/add-resume",
   auth(UserRole.ADMIN),
-  upload.single("file"),
-  (req: Request, res: Response, next: NextFunction) => {
-    if (req.file) {
-      console.log("req.file", req.file);
-    }
-    next();
-  },
+  // upload.single("file"),
+  // (req: Request, res: Response, next: NextFunction) => {
+  //   if (req.file) {
+  //     console.log("req.file", req.file);
+  //   }
+  //   next();
+  // },
   ResumeController.addResumeIntoDB
 );
 
@@ -27,13 +27,13 @@ router.get("/", ResumeController.getAllResumeDataFromDB);
 router.put(
   "/update-resume",
   auth(UserRole.ADMIN),
-  upload.single("file"),
-  (req: Request, res: Response, next: NextFunction) => {
-    if (req.file) {
-      console.log("req.file", req.file);
-    }
-    next();
-  },
+  // upload.single("file"),
+  // (req: Request, res: Response, next: NextFunction) => {
+  //   if (req.file) {
+  //     console.log("req.file", req.file);
+  //   }
+  //   next();
+  // },
   ResumeController.updateResumeFromDB
 );
 router.delete(

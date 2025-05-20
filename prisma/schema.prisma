@@ -24,27 +24,73 @@ model User {
   updatedAt    DateTime @updatedAt
 
   blog   Blog[]
-  project Project[]
 
   @@map("users")
 }
 
+// model Project {
+//   id                String @id @default(uuid())
+//   title             String
+//   live_link         String
+//   client_link       String
+//   server_link       String
+//   description String
+//   technologies        String[]
+//   project_image             String
+
+//   authorId String
+//   author   User @relation(fields: [authorId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
+//   @@map("projects")
+// }
+
+// type TTechnology ={
+//   // id: string;
+//   name: string;
+//   icon?: string;
+// }
+// export type TProject = {
+//   id: string;
+//   title: string;
+//   description: string;
+//   features?: string[];
+//   project_image?: string | null;
+//   client_link?: string;
+//   server_link?: string;
+//   live_link?: string;
+//   technologies?: TTechnology[];
+//   authorId?: string;
+//   createdAt: string;
+//   updatedAt: string;
+// };
+
 model Project {
-  id                String @id @default(uuid())
-  title             String
-  live_link         String
-  client_link       String
-  server_link       String
-  description String
-  technologies        String[]
-  project_image             String
+  id            String     @id @default(uuid())
+  title         String
+  description   String
+  features      String[]   // Optional: can be omitted if not used
+  project_image String?    // Optional
+  client_link   String
+  server_link   String
+  live_link     String
 
-  authorId String
-  author   User @relation(fields: [authorId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  technologies  Technology[] // One-to-many relationship
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+
   @@map("projects")
+}
+model Technology {
+  id        String   @id @default(uuid())
+  name      String
+  icon      String?  
+  project   Project? @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  projectId String?
+
+  @@map("technologies")
 }
 
 model Blog {
