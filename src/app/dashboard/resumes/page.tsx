@@ -11,12 +11,10 @@ export default async function ResumesPage() {
   const response = await getAllResume()
   const data = response?.data;
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 px-4">
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Resumes</h1>
-        <p className="text-muted-foreground">
-          Manage your resume PDFs and set which one displays on your site
-        </p>
+       
       </div>
       <ResumeList resumes={data}/>
     </div>

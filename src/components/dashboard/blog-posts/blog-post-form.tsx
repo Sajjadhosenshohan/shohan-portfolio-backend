@@ -1,12 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo, useRef, useEffect } from "react";
 import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
-import { X, CalendarIcon } from "lucide-react";
+import { Loader2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { format } from "date-fns";
 import {
   Dialog,
   DialogContent,
@@ -24,7 +21,6 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -32,70 +28,61 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import {
-  Calendar
-} from "@/components/ui/calendar";
 import { ImageUpload } from "../shared/image-upload";
+import JoditEditor from "jodit-react";
+import { TBlog } from "@/types/blog.type";
 
-const blogPostSchema = z.object({
-  id: z.string().optional(),
-  title: z.string().min(1, { message: "Title is required" }),
-  content: z.string().min(1, { message: "Content is required" }),
-  excerpt: z.string().min(1, { message: "Excerpt is required" }),
-  imageUrl: z.string().optional(),
-  publishedAt: z.string(),
-  status: z.enum(["draft", "published"]),
-  tags: z.array(z.string()).default([]),
-});
-
-type BlogPostFormValues = z.infer<typeof blogPostSchema>;
-
-interface BlogPost {
-  id: string;
+interface BlogPostFormValues {
+  id?: string;
   title: string;
-  content: string;
-  excerpt: string;
-  imageUrl: string;
-  publishedAt: string;
-  status: "draft" | "published";
+  short_description: string;
+  blog_image: string | File;
+  status: "DRAFT" | "PUBLISHED" | "ARCHIVED";
   tags: string[];
 }
 
 interface BlogPostFormProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  post: BlogPost | null;
-  onSubmit: (values: BlogPost | Omit<BlogPost, 'id'>) => void;
+  post: TBlog | null;
+  onSubmit: (values: BlogPostFormValues & { id?: string }) => Promise<void>;
 }
 
-export function BlogPostForm({ open, onOpenChange, post, onSubmit }: BlogPostFormProps) {
+export function BlogPostForm({
+  open,
+  onOpenChange,
+  post,
+  onSubmit,
+}: BlogPostFormProps) {
   const [tagInput, setTagInput] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const editorRef = useRef(null);
+
+  const defaultValues: BlogPostFormValues = useMemo(() => ({
+    title: post?.title || "",
+    short_description: post?.short_description || "",
+    blog_image: post?.blog_image || "",
+    status: post?.status || "DRAFT",
+    tags: post?.tags || [],
+  }), [post]);
 
   const form = useForm<BlogPostFormValues>({
-    resolver: zodResolver(blogPostSchema),
-    defaultValues: post || {
-      title: "",
-      content: "",
-      excerpt: "",
-      imageUrl: "",
-      publishedAt: new Date().toISOString(),
-      status: "draft",
-      tags: [],
-    },
+    defaultValues,
   });
 
-  const handleImageUpload = (url: string) => {
-    form.setValue("imageUrl", url);
-  };
+  useEffect(() => {
+    form.reset(defaultValues);
+  }, [post, form, defaultValues]);
+
+  const joditConfig = useMemo(() => ({
+    readonly: false,
+    placeholder: "Write your blog post content here...",
+    height: 300,
+  }), []);
 
   const addTag = () => {
-    if (tagInput.trim() && !form.getValues().tags.includes(tagInput.trim())) {
-      form.setValue("tags", [...form.getValues().tags, tagInput.trim()]);
+    if (tagInput.trim() && !form.getValues("tags").includes(tagInput.trim())) {
+      form.setValue("tags", [...form.getValues("tags"), tagInput.trim()]);
       setTagInput("");
     }
   };
@@ -103,36 +90,51 @@ export function BlogPostForm({ open, onOpenChange, post, onSubmit }: BlogPostFor
   const removeTag = (tagToRemove: string) => {
     form.setValue(
       "tags",
-      form.getValues().tags.filter(tag => tag !== tagToRemove)
+      form.getValues("tags").filter((tag) => tag !== tagToRemove)
     );
   };
 
-  const handleSubmit = (values: BlogPostFormValues) => {
-    onSubmit(values as BlogPost);
+  const handleFormSubmit = async (values: BlogPostFormValues) => {
+    setIsSubmitting(true);
+    try {
+      await onSubmit({
+        ...values,
+        id: post?.id,
+      });
+      if (!post) {
+        form.reset(defaultValues);
+        setTagInput("");
+      }
+      onOpenChange(false);
+    } catch (error) {
+      console.error("Submission error:", error);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
-  // For demo purposes, simulate image upload with a placeholder
-  const simulateImageUpload = (file: File) => {
-    // In a real app, you would upload to a storage service
-    // This just creates a fake image URL for demonstration
-    const demoImageUrl = "https://images.pexels.com/photos/7014337/pexels-photo-7014337.jpeg";
-    handleImageUpload(demoImageUrl);
+  const handleImageChange = (file: File | string) => {
+    form.setValue("blog_image", file);
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[800px] max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-[80%] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>{post ? "Edit Blog Post" : "Create New Blog Post"}</DialogTitle>
+          <DialogTitle>
+            {post ? "Edit Blog Post" : "Create New Blog Post"}
+          </DialogTitle>
           <DialogDescription>
-            {post 
-              ? "Update your blog post content and settings" 
-              : "Create a new blog post for your portfolio"
-            }
+            {post
+              ? "Update your blog post content and settings."
+              : "Create a new blog post for your portfolio."}
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+          <form
+            onSubmit={form.handleSubmit(handleFormSubmit)}
+            className="space-y-4"
+          >
             <FormField
               control={form.control}
               name="title"
@@ -140,7 +142,7 @@ export function BlogPostForm({ open, onOpenChange, post, onSubmit }: BlogPostFor
                 <FormItem>
                   <FormLabel>Title</FormLabel>
                   <FormControl>
-                    <Input placeholder="My Amazing Blog Post" {...field} />
+                    <Input {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -148,32 +150,16 @@ export function BlogPostForm({ open, onOpenChange, post, onSubmit }: BlogPostFor
             />
             <FormField
               control={form.control}
-              name="excerpt"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Excerpt</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      placeholder="A brief summary of your post..."
-                      rows={2}
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="content"
+              name="short_description"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Content</FormLabel>
                   <FormControl>
-                    <Textarea
-                      placeholder="Write your blog post content..."
-                      rows={10}
-                      {...field}
+                    <JoditEditor
+                      ref={editorRef}
+                      value={field.value}
+                      config={joditConfig}
+                      onBlur={(newContent) => field.onChange(newContent)}
                     />
                   </FormControl>
                   <FormMessage />
@@ -183,15 +169,16 @@ export function BlogPostForm({ open, onOpenChange, post, onSubmit }: BlogPostFor
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <FormField
                 control={form.control}
-                name="imageUrl"
+                name="blog_image"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Featured Image</FormLabel>
                     <FormControl>
                       <ImageUpload
-                        value={field.value || ""}
-                        onChange={field.onChange}
-                        onUpload={simulateImageUpload}
+                        value={
+                          typeof field.value === "string" ? field.value : ""
+                        }
+                        onChange={handleImageChange}
                       />
                     </FormControl>
                     <FormMessage />
@@ -205,8 +192,8 @@ export function BlogPostForm({ open, onOpenChange, post, onSubmit }: BlogPostFor
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Status</FormLabel>
-                      <Select 
-                        onValueChange={field.onChange} 
+                      <Select
+                        onValueChange={field.onChange}
                         defaultValue={field.value}
                       >
                         <FormControl>
@@ -215,49 +202,11 @@ export function BlogPostForm({ open, onOpenChange, post, onSubmit }: BlogPostFor
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="draft">Draft</SelectItem>
-                          <SelectItem value="published">Published</SelectItem>
+                          <SelectItem value="DRAFT">Draft</SelectItem>
+                          <SelectItem value="PUBLISHED">Published</SelectItem>
+                          <SelectItem value="ARCHIVED">Archived</SelectItem>
                         </SelectContent>
                       </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="publishedAt"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-col">
-                      <FormLabel>Publish Date</FormLabel>
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <FormControl>
-                            <Button
-                              variant={"outline"}
-                              className={`w-full pl-3 text-left font-normal ${
-                                !field.value ? "text-muted-foreground" : ""
-                              }`}
-                            >
-                              {field.value ? (
-                                format(new Date(field.value), "PPP")
-                              ) : (
-                                <span>Pick a date</span>
-                              )}
-                              <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                            </Button>
-                          </FormControl>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0" align="start">
-                          <Calendar
-                            mode="single"
-                            selected={new Date(field.value)}
-                            onSelect={(date) => 
-                              field.onChange(date ? date.toISOString() : new Date().toISOString())
-                            }
-                            initialFocus
-                          />
-                        </PopoverContent>
-                      </Popover>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -280,9 +229,9 @@ export function BlogPostForm({ open, onOpenChange, post, onSubmit }: BlogPostFor
                             }
                           }}
                         />
-                        <Button 
-                          type="button" 
-                          variant="secondary" 
+                        <Button
+                          type="button"
+                          variant="secondary"
                           onClick={addTag}
                         >
                           Add
@@ -292,16 +241,16 @@ export function BlogPostForm({ open, onOpenChange, post, onSubmit }: BlogPostFor
                         {form.watch("tags").map((tag, index) => (
                           <div
                             key={index}
-                            className="flex items-center gap-1 px-2 py-1 bg-secondary rounded-md"
+                            className="flex items-center gap-1 px-2 py-1 bg-secondary rounded-md text-sm"
                           >
-                            <span className="text-sm">{tag}</span>
+                            <span>{tag}</span>
                             <button
                               type="button"
                               onClick={() => removeTag(tag)}
                               className="text-muted-foreground hover:text-foreground"
+                              aria-label={`Remove ${tag} tag`}
                             >
                               <X className="h-3 w-3" />
-                              <span className="sr-only">Remove {tag}</span>
                             </button>
                           </div>
                         ))}
@@ -313,27 +262,26 @@ export function BlogPostForm({ open, onOpenChange, post, onSubmit }: BlogPostFor
               </div>
             </div>
             <DialogFooter className="pt-4">
-              <Button variant="outline" type="button" onClick={() => onOpenChange(false)}>
+              <Button
+                variant="outline"
+                type="button"
+                onClick={() => {
+                  onOpenChange(false);
+                }}
+                disabled={isSubmitting}
+              >
                 Cancel
               </Button>
-              <Button 
-                type="button"
-                onClick={() => {
-                  form.setValue("status", "draft");
-                  form.handleSubmit(handleSubmit)();
-                }}
-                variant="secondary"
-              >
-                Save as Draft
-              </Button>
-              <Button 
-                type="button"
-                onClick={() => {
-                  form.setValue("status", "published");
-                  form.handleSubmit(handleSubmit)();
-                }}
-              >
-                {post ? "Update" : "Publish"}
+              <Button type="submit" variant="destructive"
+                disabled={isSubmitting} className="text-white">
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    {post ? "Updating..." : "Creating..."}
+                  </>
+                ) : (
+                  post ? "Update Post" : "Create Post"
+                )}
               </Button>
             </DialogFooter>
           </form>

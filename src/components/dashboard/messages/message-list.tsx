@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useState } from "react";
@@ -29,7 +31,6 @@ export default function MessageList({ messages }: { messages: TMessage[] }) {
   const handleDeleteMessage = async (id: string) => {
    try {
       const res = await deleteMessage(id);
-      console.log("delete message", res?.data)
       if (res.success) {
         // setSelectedMessage(res?.data);
         setIsDetailOpen(false);
@@ -46,7 +47,6 @@ export default function MessageList({ messages }: { messages: TMessage[] }) {
   const openMessageDetail = async (id:string) => {
     try {
       const res = await getMessageDetails(id);
-      console.log("message", res?.data)
       if (res.success) {
         setSelectedMessage(res?.data);
         setIsDetailOpen(true);
@@ -62,11 +62,9 @@ export default function MessageList({ messages }: { messages: TMessage[] }) {
 
   // const unreadCount = messages.filter(message => !message.isRead).length;
 
-  if(loading) return <div className="text center mx-auto">Loading....</div>
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h2 className="text-xl font-semibold tracking-tight">Your Messages</h2>
         {/* {unreadCount > 0 && (
           <div className="bg-primary text-primary-foreground px-2 py-1 rounded-full text-xs">
             {unreadCount} unread
@@ -92,7 +90,7 @@ export default function MessageList({ messages }: { messages: TMessage[] }) {
             <Card
               key={message.id}
               className={`
-                cursor-pointer hover:bg-muted/50 transition-colors border-l-4 border-l-primary
+                cursor-pointer hover:bg-muted/50 transition-colors border-l-4 border-l-red-600
               `}
               onClick={() => openMessageDetail(message?.id)}
             >
@@ -118,14 +116,12 @@ export default function MessageList({ messages }: { messages: TMessage[] }) {
                     </div>
                   </div>
                   <div className="flex items-center gap-4">
-                    <div>
-                      <Button variant={'outline'} className="cursor-pointer">See details</Button>
-                    </div>
+                   
                     <AlertDialog>
                       <AlertDialogTrigger asChild>
-                        <Button variant={'outline'} onClick={(e) => {
+                        <Button variant={'destructive'} size={"sm"} onClick={(e) => {
                             e.stopPropagation();
-                          }} className="cursor-pointer">Delete</Button>
+                          }} className="cursor-pointer text-white">Delete</Button>
                         {/* <Button
                           variant="ghost"
                           size="icon"
@@ -150,7 +146,7 @@ export default function MessageList({ messages }: { messages: TMessage[] }) {
                             e.stopPropagation();
                           }}>Cancel</AlertDialogCancel>
                           <AlertDialogAction
-                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                            className="bg-destructive !text-white text-destructive-foreground hover:bg-destructive/90"
                             onClick={() => handleDeleteMessage(message.id)}
                           >
                             Delete

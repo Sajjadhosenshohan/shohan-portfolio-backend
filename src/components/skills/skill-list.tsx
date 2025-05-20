@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useState } from "react";
@@ -19,6 +20,7 @@ import { SkillForm, SkillFormValues } from "./skill-form"; // Ensure path is cor
 import { TSkill } from "@/types/skill.type"; // Make sure this type is defined
 import { addSkill, deleteSkill } from "@/services/skills";
 import { toast } from "sonner";
+import Image from "next/image";
 
 export default function SkillList({ skills }: { skills: TSkill[] }) {
   // const [skills, setSkills] = useState<TSkill[]>(initialSkills);
@@ -64,24 +66,14 @@ export default function SkillList({ skills }: { skills: TSkill[] }) {
     }
   };
 
-  // // Optional: Cleanup all object URLs when the component unmounts
-  // useEffect(() => {
-  //   return () => {
-  //     skills.forEach((skill) => {
-  //       if (skill.image && skill.image.startsWith("blob:")) {
-  //         URL.revokeObjectURL(skill.image);
-  //       }
-  //     });
-  //   };
-  // }, [skills]); // Re-run if skills array changes, to correctly capture all URLs for cleanup
-
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h2 className="text-xl font-semibold tracking-tight">Your Skills</h2>
         <Button
+        variant="destructive"
+        className="text-white"
           onClick={() => {
-            // setEditingSkill(null); // Clear any editing state
             setIsFormOpen(true);
           }}
         >
@@ -101,6 +93,8 @@ export default function SkillList({ skills }: { skills: TSkill[] }) {
               </p>
             </div>
             <Button
+            variant="destructive"
+        className="text-white"
               onClick={() => {
                 // setEditingSkill(null);
                 setIsFormOpen(true);
@@ -119,7 +113,9 @@ export default function SkillList({ skills }: { skills: TSkill[] }) {
                 <div className="flex items-start justify-between">
                   <div className="flex items-center space-x-4">
                     {skill.image ? (
-                      <img
+                      <Image
+                      width={100}
+                      height={100}
                         src={skill?.image}
                         alt={skill?.name}
                         className="h-12 w-12 object-cover rounded-md"
@@ -147,14 +143,14 @@ export default function SkillList({ skills }: { skills: TSkill[] }) {
                       <AlertDialogHeader>
                         <AlertDialogTitle>Delete Skill</AlertDialogTitle>
                         <AlertDialogDescription>
-                          Are you sure you want to delete the skill "
-                          {skill.name}"? This action cannot be undone.
+                          Are you sure you want to delete the skill 
+                          {skill.name}? This action cannot be undone.
                         </AlertDialogDescription>
                       </AlertDialogHeader>
                       <AlertDialogFooter>
                         <AlertDialogCancel>Cancel</AlertDialogCancel>
                         <AlertDialogAction
-                          className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                          className="bg-destructive !text-white text-destructive-foreground hover:bg-destructive/90"
                           onClick={() => handleDeleteSkill(skill?.id)}
                         >
                           Delete

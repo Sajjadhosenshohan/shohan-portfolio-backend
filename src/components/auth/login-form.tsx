@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useState } from "react";
@@ -59,7 +60,7 @@ export default function LoginForm() {
         toast.error(res.message || "Login failed");
       }
       router.refresh();
-    } catch (error) {
+    } catch (error:any) {
       toast.error(error?.message || 'Login failed')
     } finally {
       setIsLoading(false);

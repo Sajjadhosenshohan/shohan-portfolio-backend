@@ -1,12 +1,15 @@
 import { Metadata } from "next";
 import ProjectList from "@/components/dashboard/projects/project-list";
+import { getAllProjects } from "@/services/project";
 
 export const metadata: Metadata = {
   title: "Projects - Portfolio Dashboard",
   description: "Manage your portfolio projects",
 };
 
-export default function ProjectsPage() {
+export default async function ProjectsPage() {
+  const projectList = await getAllProjects()
+    const data = projectList?.data || [];
   return (
     <div className="space-y-6">
       <div>
@@ -15,7 +18,7 @@ export default function ProjectsPage() {
           Manage your portfolio projects and skills
         </p>
       </div>
-      <ProjectList />
+      <ProjectList AllProject={data}/>
     </div>
   );
 }

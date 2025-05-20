@@ -1,12 +1,15 @@
 import { Metadata } from "next";
 import ResumeList from "@/components/dashboard/resumes/resume-list";
+import { getAllResume } from "@/services/resume";
 
 export const metadata: Metadata = {
   title: "Resumes - Portfolio Dashboard",
   description: "Manage your resume PDFs",
 };
 
-export default function ResumesPage() {
+export default async function ResumesPage() {
+  const resumeList = await getAllResume()
+    const data = resumeList?.data || [];
   return (
     <div className="space-y-6">
       <div>
@@ -15,7 +18,7 @@ export default function ResumesPage() {
           Manage your resume PDFs and set which one displays on your site
         </p>
       </div>
-      <ResumeList />
+      <ResumeList resumes={data}/>
     </div>
   );
 }

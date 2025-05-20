@@ -11,12 +11,10 @@ export default async function MessagesPage() {
   const response = await getAllMessages()
   const data = response?.data;
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 px-4">
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Messages</h1>
-        <p className="text-muted-foreground">
-          View and manage messages from your contact form
-        </p>
+        
       </div>
       <MessageList messages={data}/>
     </div>

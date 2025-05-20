@@ -1,6 +1,6 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use server";
 import { cookies } from "next/headers";
-import { FieldValues } from "react-hook-form";
 import { revalidateTag } from "next/cache";
 export const getAllProjects = async () => {
   try {

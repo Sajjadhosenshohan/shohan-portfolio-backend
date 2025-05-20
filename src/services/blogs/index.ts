@@ -2,13 +2,12 @@
 "use server";
 import { cookies } from "next/headers";
 import { revalidateTag } from "next/cache";
-
-export const getAllSkill = async () => {
+export const getAllBlog = async () => {
   try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_API}/skills`, {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_API}/blogs`, {
       method: "GET",
       next: {
-        tags: ["skills"],
+        tags: ["blogs"],
       },
     });
 
@@ -19,20 +18,20 @@ export const getAllSkill = async () => {
   }
 };
 
-export const addSkill = async (skillData: FormData) => {
+export const addBlog = async (blogData: FormData) => {
   try {
     const res = await fetch(
-      `${process.env.NEXT_PUBLIC_BASE_API}/skills/add-skill`,
+      `${process.env.NEXT_PUBLIC_BASE_API}/blogs/add-blog`,
       {
         method: "POST",
         headers: {
           Authorization: (await cookies()).get("accessToken")?.value || "",
         },
-        body: skillData,
+        body: blogData,
       }
     );
 
-    revalidateTag("skills");
+    revalidateTag("blogs");
 
     const result = await res.json();
     return result;
@@ -41,10 +40,10 @@ export const addSkill = async (skillData: FormData) => {
   }
 };
 
-export const deleteSkill = async (skillId: string) => {
+export const deleteBlog = async (blogId: string) => {
   try {
     const res = await fetch(
-      `${process.env.NEXT_PUBLIC_BASE_API}/skills/delete-skill?id=${skillId}`,
+      `${process.env.NEXT_PUBLIC_BASE_API}/blogs/delete-blog?id=${blogId}`,
       {
         method: "DELETE",
         headers: {
@@ -52,7 +51,7 @@ export const deleteSkill = async (skillId: string) => {
         },
       }
     );
-    revalidateTag("skills");
+    revalidateTag("blogs");
 
     const result = await res.json();
     return result;
@@ -61,33 +60,27 @@ export const deleteSkill = async (skillId: string) => {
   }
 };
 
-// export const updateResume = async (resume:Partial<TResume>, file?: File) => {
-//   const formData = new FormData();
-//   formData.append("data", JSON.stringify({ ...resume }));
-//   if (file) {
-//     formData.append("file", file);
-//   }
+export const updateBlog = async (formData:FormData) => {
 
-//   console.log(Object.fromEntries(formData.entries()));
-//   try {
-//     const res = await fetch(
-//       `${process.env.NEXT_PUBLIC_BASE_API}/resume/update-resume`,
-//       {
-//         method: "PUT",
-//         headers: {
-//           Authorization: (await cookies()).get("accessToken")?.value || "",
-//         },
-//         body: formData,
-//       }
-//     );
+  try {
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_BASE_API}/blogs/update-blog`,
+      {
+        method: "PUT",
+        headers: {
+          Authorization: (await cookies()).get("accessToken")?.value || "",
+        },
+        body: formData,
+      }
+    );
+    revalidateTag("blogs");
 
-//     const result = await res.json();
-//     console.log("result", result);
-//     return result;
-//   } catch (error: any) {
-//     return Error(error);
-//   }
-// };
+    const result = await res.json();
+    return result;
+  } catch (error: any) {
+    return Error(error);
+  }
+};
 
 // export const getResumeDetails = async (resumeId: string) => {
 //   try {

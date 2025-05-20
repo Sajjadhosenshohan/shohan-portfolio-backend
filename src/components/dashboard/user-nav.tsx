@@ -5,20 +5,17 @@ import { Button } from "@/components/ui/button";
 
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "../ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "../ui/avatar";
-import { useToast } from "@/hooks/use-toast";
 import { useUser } from "@/context/UserContext";
+import { toast } from "sonner";
+import { logoutUser } from "@/services/authService";
 
 export function UserNav() {
-  const { user, setIsLoading } = useUser();
+  const { user } = useUser();
   const router = useRouter();
-  const { toast } = useToast();
 
   const handleSignOut = async () => {
-    await handleSignOut();
-    toast({
-      title: "Logged out",
-      description: "You've been successfully logged out",
-    });
+    await logoutUser();
+    toast.success("Logged out successfully");
     router.push("/");
   };
 
@@ -27,10 +24,8 @@ export function UserNav() {
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="relative h-8 w-8 rounded-full">
           <Avatar className="h-8 w-8">
-            <AvatarFallback>
-              {user?.name
-                ? user.name.charAt(0).toUpperCase()
-                : "U"}
+            <AvatarFallback className="!text-sm !p-1 !font-extralight !leading-none">
+              {"Admin"}
             </AvatarFallback>
           </Avatar>
         </Button>
@@ -39,7 +34,7 @@ export function UserNav() {
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-1">
             <p className="text-sm font-medium leading-none">
-              {user?.name || "User"}
+              {"Admin"}
             </p>
             <p className="text-xs leading-none text-muted-foreground">
               {user?.email || "user@example.com"}

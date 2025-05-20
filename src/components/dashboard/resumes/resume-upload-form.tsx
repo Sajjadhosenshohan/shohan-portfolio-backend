@@ -1,122 +1,117 @@
 "use client";
 
-import { useState, useCallback } from "react";
-import { useDropzone } from "react-dropzone";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Loader2, Upload } from "lucide-react";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Loader2, Upload } from "lucide-react";
 
 interface ResumeUploadFormProps {
-  onUpload: (file: File) => void;
+  onUpload: (title: string, isActive: boolean, link: string) => Promise<void>;
   isUploading: boolean;
 }
 
 export function ResumeUploadForm({ onUpload, isUploading }: ResumeUploadFormProps) {
-  const [file, setFile] = useState<File | null>(null);
+  const [title, setTitle] = useState("");
+  const [isActive, setIsActive] = useState(false);
+  const [link, setLink] = useState("");
   const [open, setOpen] = useState(false);
 
-  const onDrop = useCallback((acceptedFiles: File[]) => {
-    if (acceptedFiles.length > 0) {
-      setFile(acceptedFiles[0]);
-    }
-  }, []);
-
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({
-    onDrop,
-    accept: {
-      'application/pdf': ['.pdf'],
-    },
-    maxFiles: 1,
-    multiple: false,
-  });
-
-  const handleUpload = () => {
-    if (file) {
-      onUpload(file);
+  const handleUpload = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (link) {
+      await onUpload(title, isActive, link);
       setOpen(false);
-      setFile(null);
+      resetForm();
     }
+  };
+
+  const resetForm = () => {
+    setTitle("");
+    setIsActive(false);
+    setLink("");
   };
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button>
+        <Button className="text-white" variant={"destructive"}>
           <Upload className="mr-2 h-4 w-4" />
-          Upload Resume
+          Add Resume Link
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Upload Resume</DialogTitle>
+          <DialogTitle>Add Resume Link</DialogTitle>
           <DialogDescription>
-            Upload a PDF file of your resume to display on your portfolio
+            Add a new resume link to your portfolio
           </DialogDescription>
         </DialogHeader>
-        <div
-          {...getRootProps()}
-          className={`border-2 border-dashed rounded-lg p-8 text-center ${
-            isDragActive ? "border-primary bg-primary/10" : "border-input"
-          } cursor-pointer hover:border-primary/50 transition-colors`}
-        >
-          <input {...getInputProps()} />
-          {file ? (
-            <div className="space-y-2">
-              <p className="font-medium">{file.name}</p>
-              <p className="text-sm text-muted-foreground">
-                {(file.size / 1024 / 1024).toFixed(2)} MB
-              </p>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setFile(null);
-                }}
-              >
-                Change file
-              </Button>
-            </div>
-          ) : (
-            <div className="space-y-2">
-              <div className="flex justify-center">
-                <Upload className="h-10 w-10 text-muted-foreground" />
-              </div>
-              <p className="text-sm font-medium">
-                Drag & drop a PDF file here, or click to browse
-              </p>
-              <p className="text-xs text-muted-foreground">
-                PDF files only, maximum 10MB
-              </p>
-            </div>
-          )}
-        </div>
-        <DialogFooter>
-          <Button variant="outline" onClick={() => setOpen(false)}>
-            Cancel
-          </Button>
-          <Button 
-            onClick={handleUpload} 
-            disabled={!file || isUploading}
-          >
-            {isUploading ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Uploading...
-              </>
-            ) : (
-              "Upload"
-            )}
-          </Button>
-        </DialogFooter>
+        
+        <form onSubmit={handleUpload} className="space-y-4">
+          <Input
+            type="text"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            placeholder="Resume title"
+            required
+          />
+
+          <Input
+            type="url"
+            value={link}
+            onChange={(e) => setLink(e.target.value)}
+            placeholder="Resume URL (e.g., https://example.com/resume.pdf)"
+            // required
+          />
+
+          <div className="flex items-center gap-2">
+            <Checkbox
+              id="isActive"
+              checked={isActive}
+              onCheckedChange={(checked) => setIsActive(checked as boolean)}
+            />
+            <label htmlFor="isActive" className="text-sm text-muted-foreground">
+              Set as Active Resume
+            </label>
+          </div>
+
+          <div className="flex justify-end gap-2">
+            <Button
+              variant="outline"
+              type="button"
+              onClick={() => {
+                setOpen(false);
+                resetForm();
+              }}
+            >
+              Cancel
+            </Button>
+            <Button 
+              variant={"destructive"}
+              className="text-white"
+              type="submit" 
+              disabled={isUploading || !link || !title}
+            >
+              {isUploading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                "Save Resume Link"
+              )}
+            </Button>
+          </div>
+        </form>
       </DialogContent>
     </Dialog>
   );

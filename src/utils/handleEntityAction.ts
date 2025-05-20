@@ -1,10 +1,10 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client'
 import { addProject, deleteProject, updateProject } from "@/services/project";
 import { Dispatch, SetStateAction } from "react";
 import { toast } from "sonner";
 
-// Entity টাইপ: শুধু যেগুলা আছে সেগুলা রাখবে
-type EntityType = "project" | "blog"; // চাইলে blog বাদ দিয়ে শুধু "project" রাখো
+type EntityType = "project" | "blog";
 type ActionType = "create" | "update" | "delete";
 
 interface EntityHandlers {
@@ -13,27 +13,16 @@ interface EntityHandlers {
   delete: (id: string) => Promise<any>;
 }
 
-// পুরো entity handler map
+
 const entityHandlersMap: Partial<Record<EntityType, EntityHandlers>> = {
   project: {
     create: addProject,
     update: updateProject,
     delete: deleteProject,
-  },
-  // message:{
-  //   create: addProject,
-  //   update: updateProject,
-  //   delete: deleteProject,
-  // }
-  // blog চাইলে এখানে রাখো
-  // blog: {
-  //   create: addBlog,
-  //   update: updateBlog,
-  //   delete: deleteBlog,
-  // },
+  }
 };
 
-// মূল ফাংশন
+
 export const handleEntityAction = async (
   entity: EntityType,
   action: ActionType,
@@ -57,8 +46,9 @@ export const handleEntityAction = async (
       return;
     }
 
-    const res = await handler(payload);
+    const res = await handler(payload as any);
 
+    console.log("response of project",res)
     if (res.success) {
       toast.success(res?.message || `${entity} ${action}d successfully`);
       setIsFormOpen?.(false);

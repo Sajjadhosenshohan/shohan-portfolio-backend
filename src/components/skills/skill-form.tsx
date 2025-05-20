@@ -181,7 +181,8 @@ export function SkillForm({
               >
                 Cancel
               </Button>
-              <Button type="submit">
+              <Button variant="destructive"
+        className="text-white" type="submit">
                 {initialData?.name ? "Save Changes" : "Add Skill"}
               </Button>
             </DialogFooter>

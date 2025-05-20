@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Upload } from "lucide-react";
+import Image from "next/image";
 
 interface ImageUploadProps {
   value: string | null;
@@ -21,7 +22,7 @@ export function ImageUpload({ value, onChange }: ImageUploadProps) {
   return (
     <div className="relative">
       {preview ? (
-        <img src={preview} alt="Preview" className="h-40 w-full object-cover rounded-md" />
+        <Image src={preview} alt="Preview" width={50} height={50} className="h-40 w-full object-cover rounded-md" />
       ) : (
         <div className="h-40 w-full bg-secondary flex items-center justify-center rounded-md">
           <Upload className="h-8 w-8 text-muted-foreground" />

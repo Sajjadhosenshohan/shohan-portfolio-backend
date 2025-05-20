@@ -1,4 +1,5 @@
-'use client'
+/* eslint-disable @typescript-eslint/no-explicit-any */
+"use client";
 import {
   createContext,
   Dispatch,
@@ -7,13 +8,20 @@ import {
   useEffect,
   useState,
 } from "react";
-import { IUser } from "../types/uset.type";
 import { getCurrentUser } from "../services/authService";
+import LoadingPage from "@/app/loading";
 
+type CurrentUser = {
+  email: string;
+  exp: number;
+  iat: number;
+  id: string;
+  role: string;
+};
 interface IUserProviderValues {
-  user: IUser | null;
+  user: CurrentUser | null;
   isLoading: boolean;
-  setUser: (user: IUser | null) => Promise<void>;
+  setUser: (user: CurrentUser | null) => Promise<void>;
   setIsLoading: Dispatch<SetStateAction<boolean>>;
   fetchAndSetUser: () => Promise<void>;
 }
@@ -21,7 +29,7 @@ interface IUserProviderValues {
 const UserContext = createContext<IUserProviderValues | undefined>(undefined);
 
 const UserProvider = ({ children }: { children: React.ReactNode }) => {
-  const [user, setUserState] = useState<IUser | null>(null);
+  const [user, setUserState] = useState<CurrentUser | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [initialLoadComplete, setInitialLoadComplete] = useState(false);
 
@@ -29,7 +37,6 @@ const UserProvider = ({ children }: { children: React.ReactNode }) => {
     try {
       setIsLoading(true);
       const currentUser = await getCurrentUser();
-      // console.log("currentUser", currentUser);
       setUserState(currentUser);
     } catch (error: any) {
       console.error("Error fetching user:", error);
@@ -40,7 +47,7 @@ const UserProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
-  const setUser = async (user: IUser | null) => {
+  const setUser = async (user: CurrentUser | null) => {
     setUserState(user);
   };
 
@@ -50,7 +57,7 @@ const UserProvider = ({ children }: { children: React.ReactNode }) => {
 
   // Only render children after initial load is complete
   if (!initialLoadComplete) {
-    return <p>Shohan loading</p>;
+    return <LoadingPage/>
   }
 
   return (

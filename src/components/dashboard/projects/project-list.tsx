@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useState } from "react";
@@ -26,6 +27,8 @@ import Image from "next/image";
 import { TProject } from "@/types/project.type";
 import { useUser } from "@/context/UserContext";
 import { handleEntityAction } from "@/utils/handleEntityAction";
+import { toast } from "sonner";
+import { deleteProject } from "@/services/project";
 
 export default function ProjectList({
   AllProject,
@@ -37,71 +40,29 @@ export default function ProjectList({
   const { user } = useUser();
   const [loading, setLoading] = useState(false);
 
-  // const handleCreateProject = async (formData: FormData) => {
-  //   setLoading(true);
-  //   try {
-  //     const res = await addProject(formData);
-
-  //     if (res.success) {
-  //       toast.success(res?.message || "Project created successfully");
-  //       setIsFormOpen(false);
-  //     } else {
-  //       toast.success(res?.message || "Failed to create project");
-  //     }
-  //   } catch (error: any) {
-  //     toast.success(error?.message || "Failed to create project");
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
-
-  // const handleUpdateProject = async (formData: FormData) => {
-  //   setLoading(true);
-  //   try {
-  //     const res = await updateProject(formData);
-  //     if (res.success) {
-  //       toast.success(res?.message || "Project updated successfully");
-  //       setIsFormOpen(false);
-  //     } else {
-  //       toast.error(res?.message || "Failed to update project");
-  //     }
-  //   } catch (error: any) {
-  //     toast.error(error?.message || "Failed to update project");
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
-
-  // const handleDeleteProject = async (id: string) => {
-  //   try {
-  //     const res = await deleteProject(id);
-  //     if (res.success) {
-  //       toast.success(res?.message || "Project deleted successfully");
-  //       setIsFormOpen(false);
-  //     } else {
-  //       toast.error(res?.message || "Failed to delete project");
-  //     }
-  //   } catch (error: any) {
-  //     toast.error(error?.message || "Failed to delete project");
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
-
   const handleCreateProject = (formData: FormData) => {
-    handleEntityAction("project","create", formData,setLoading);
+    handleEntityAction("project", "create", formData, setLoading);
   };
 
   const handleUpdateProject = (formData: FormData) => {
-    handleEntityAction("project","update", formData,setLoading);
+    handleEntityAction("project", "update", formData, setLoading);
   };
 
-  const handleDeleteProject = (id: string) => {
-    handleEntityAction("project","delete", id,setLoading);
+  const handleDeleteProject = async (id: string) => {
+    try {
+      const res = await deleteProject(id);
+      if (res.success) {
+        toast.success(res?.message || "Project deleted successfully");
+        setIsFormOpen(false);
+      } else {
+        toast.error(res?.message || "Failed to delete project");
+      }
+    } catch (error: any) {
+      toast.error(error?.message || "Failed to delete project");
+    } finally {
+      setLoading(false);
+    }
   };
-//   handleEntityAction("project", "create", formData);
-// handleEntityAction("project", "update", formData);
-// handleEntityAction("project", "delete", id);
 
   const openEditForm = (project: TProject) => {
     setProjectToEdit(project);
@@ -110,9 +71,10 @@ export default function ProjectList({
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between">
-        <h2 className="text-xl font-semibold tracking-tight">Your Projects</h2>
+      <div className="flex justify-end">
         <Button
+          variant="destructive"
+          className="text-white"
           onClick={() => {
             setProjectToEdit(null);
             setIsFormOpen(true);
@@ -135,6 +97,8 @@ export default function ProjectList({
               </p>
             </div>
             <Button
+              variant="destructive"
+              className="text-white"
               onClick={() => {
                 setProjectToEdit(null);
                 setIsFormOpen(true);
@@ -169,16 +133,35 @@ export default function ProjectList({
                 <p className="text-sm text-muted-foreground line-clamp-2 mt-1">
                   {project?.description}
                 </p>
-                {project?.technologies?.length > 0 && (
-                  <div className="flex flex-wrap gap-1 mt-3">
-                    {project?.technologies?.map((skill, i) => (
-                      <span
-                        key={i}
-                        className="px-2 py-0.5 text-xs bg-secondary rounded-full"
-                      >
-                        {skill}
-                      </span>
-                    ))}
+                
+                {project.features && project.features.length > 0 && (
+                  <div className="mt-3">
+                    <h4 className="text-sm font-medium mb-1">Features:</h4>
+                    <ul className="list-disc  list-inside text-xs space-y-1">
+                      {project?.features.map((feature, i) => (
+                        <li key={i} className="line-clamp-1 ml-3"> - {feature}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+                
+                {project.technologies && project.technologies.length > 0 && (
+                  <div className="mt-3">
+                    <h4 className="text-sm font-medium mb-1">Technologies:</h4>
+                    <div className="flex flex-wrap gap-1">
+                      {project.technologies.map((tech, i) => (
+                        <div key={i} className="flex items-center gap-1 px-2 py-0.5 text-xs bg-secondary rounded-full">
+                          {/* {tech.icon && (
+                            <img 
+                              src={tech.icon} 
+                              alt={tech.name}
+                              className="h-3 w-3 object-contain"
+                            />
+                          )} */}
+                          <span>{tech.name}</span>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 )}
               </CardContent>
@@ -198,7 +181,7 @@ export default function ProjectList({
                       <Button
                         variant="destructive"
                         size="sm"
-                        className="flex-1"
+                        className="flex-1 text-white"
                       >
                         <Trash2 className="h-4 w-4 mr-1" />
                         Delete
@@ -215,7 +198,7 @@ export default function ProjectList({
                       <AlertDialogFooter>
                         <AlertDialogCancel>Cancel</AlertDialogCancel>
                         <AlertDialogAction
-                          className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                          className="bg-destructive !text-white text-destructive-foreground hover:bg-destructive/90"
                           onClick={() => handleDeleteProject(project?.id)}
                         >
                           Delete

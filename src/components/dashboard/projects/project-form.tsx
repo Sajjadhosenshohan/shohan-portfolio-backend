@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useState, useEffect } from "react";
@@ -23,17 +24,18 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { ImageUpload } from "../shared/image-upload";
-import { TProject } from "@/types/project.type";
+import { TProject, TTechnology } from "@/types/project.type";
 
 type ProjectFormValues = {
   id?: string;
   title: string;
   description: string;
+  features?: string[];
   project_image?: File | string | null;
   client_link?: string;
   server_link?: string;
   live_link?: string;
-  technologies: string[];
+  technologies?: TTechnology[];
 };
 
 interface ProjectFormProps {
@@ -53,7 +55,9 @@ export function ProjectForm({
   loading,
   user,
 }: ProjectFormProps) {
-  const [skillInput, setSkillInput] = useState("");
+  const [techInput, setTechInput] = useState("");
+  const [techIconInput, setTechIconInput] = useState("");
+  const [featureInput, setFeatureInput] = useState("");
   const [previewImage, setPreviewImage] = useState<string | null>(
     project?.project_image || null
   );
@@ -63,6 +67,7 @@ export function ProjectForm({
       id: project?.id || "",
       title: project?.title || "",
       description: project?.description || "",
+      features: project?.features || [],
       project_image: project?.project_image || null,
       client_link: project?.client_link || "",
       server_link: project?.server_link || "",
@@ -77,6 +82,7 @@ export function ProjectForm({
         id: project.id || "",
         title: project.title || "",
         description: project.description || "",
+        features: project.features || [],
         project_image: project.project_image || null,
         client_link: project.client_link || "",
         server_link: project.server_link || "",
@@ -89,6 +95,7 @@ export function ProjectForm({
         id: "",
         title: "",
         description: "",
+        features: [],
         project_image: null,
         client_link: "",
         server_link: "",
@@ -106,23 +113,44 @@ export function ProjectForm({
     return () => URL.revokeObjectURL(previewUrl);
   };
 
-  const addSkill = () => {
-    if (
-      skillInput.trim() &&
-      !form.getValues().technologies.includes(skillInput.trim())
-    ) {
+  const addTechnology = () => {
+    if (techInput.trim()) {
+      const newTech: TTechnology = {
+        name: techInput.trim(),
+        icon: techIconInput.trim() || undefined,
+      };
       form.setValue("technologies", [
-        ...form.getValues().technologies,
-        skillInput.trim(),
+        ...(form.getValues("technologies") || []),
+        newTech,
       ]);
-      setSkillInput("");
+      setTechInput("");
+      setTechIconInput("");
     }
   };
 
-  const removeSkill = (skillToRemove: string) => {
+  const removeTechnology = (index: number) => {
+    const currentTech = form.getValues("technologies") || [];
     form.setValue(
       "technologies",
-      form.getValues().technologies.filter((skill) => skill !== skillToRemove)
+      currentTech.filter((_, i) => i !== index)
+    );
+  };
+
+  const addFeature = () => {
+    if (featureInput.trim()) {
+      form.setValue("features", [
+        ...(form.getValues("features") || []),
+        featureInput.trim(),
+      ]);
+      setFeatureInput("");
+    }
+  };
+
+  const removeFeature = (index: number) => {
+    const currentFeatures = form.getValues("features") || [];
+    form.setValue(
+      "features",
+      currentFeatures.filter((_, i) => i !== index)
     );
   };
 
@@ -134,22 +162,17 @@ export function ProjectForm({
       title: values.title,
       authorId: user?.id,
       description: values.description,
+      features: values.features || [],
       client_link: values.client_link || "",
       server_link: values.server_link || "",
       live_link: values.live_link || "",
-      technologies: values.technologies,
+      technologies: values.technologies || [],
     };
-
     formData.append("data", JSON.stringify(data));
 
     if (values.project_image instanceof File) {
       formData.append("file", values.project_image);
     }
-
-    // console.log("Submitting FormData:");
-    // for (const pair of formData.entries()) {
-    //   console.log(pair[0], pair[1]);
-    // }
 
     onSubmit(formData);
   };
@@ -202,6 +225,44 @@ export function ProjectForm({
                 </FormItem>
               )}
             />
+
+            <div>
+              <FormLabel>Features</FormLabel>
+              <div className="flex gap-2 mb-2">
+                <Input
+                  placeholder="Add a project feature"
+                  value={featureInput}
+                  onChange={(e) => setFeatureInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      addFeature();
+                    }
+                  }}
+                />
+                <Button type="button" variant="secondary" onClick={addFeature}>
+                  Add
+                </Button>
+              </div>
+              <div className="space-y-2">
+                {form.watch("features")?.map((feature, index) => (
+                  <div
+                    key={index}
+                    className="flex items-center justify-between gap-2 px-3 py-2 bg-secondary rounded-md"
+                  >
+                    <span className="text-sm">{feature}</span>
+                    <button
+                      type="button"
+                      onClick={() => removeFeature(index)}
+                      className="text-muted-foreground hover:text-foreground"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+
             <FormField
               control={form.control}
               name="project_image"
@@ -218,6 +279,7 @@ export function ProjectForm({
                 </FormItem>
               )}
             />
+
             <FormField
               control={form.control}
               name="live_link"
@@ -237,6 +299,7 @@ export function ProjectForm({
                 </FormItem>
               )}
             />
+
             <FormField
               control={form.control}
               name="client_link"
@@ -259,6 +322,7 @@ export function ProjectForm({
                 </FormItem>
               )}
             />
+
             <FormField
               control={form.control}
               name="server_link"
@@ -281,54 +345,60 @@ export function ProjectForm({
                 </FormItem>
               )}
             />
-            <FormField
-              control={form.control}
-              name="technologies"
-              render={() => (
-                <FormItem>
-                  <FormLabel>Technologies</FormLabel>
-                  <div className="flex gap-2">
-                    <Input
-                      placeholder="Add a technology (e.g., React)"
-                      value={skillInput}
-                      onChange={(e) => setSkillInput(e.target.value)}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") {
-                          e.preventDefault();
-                          addSkill();
-                        }
-                      }}
-                    />
-                    <Button
+
+            {/* <Input
+                  placeholder="Icon URL (optional)"
+                  value={techIconInput}
+                  className="hidden"
+                  onChange={(e) => setTechIconInput(e.target.value)}
+                /> */}
+            <div>
+              <FormLabel>Technologies</FormLabel>
+              <div className="flex gap-2 mb-2">
+                <Input
+                  className="w-[80%]"
+                  placeholder="Technology name (e.g., React)"
+                  value={techInput}
+                  onChange={(e) => setTechInput(e.target.value)}
+                />
+                <Button
+                  type="button"
+                  variant="secondary"
+                  onClick={addTechnology}
+                  className="w-[20%] mb-2"
+                >
+                  Add
+                </Button>
+              </div>
+
+              <div className="space-y-2">
+                {form.watch("technologies")?.map((tech, index) => (
+                  <div
+                    key={index}
+                    className="flex items-center justify-between gap-2 px-3 py-2 bg-secondary rounded-md"
+                  >
+                    <div className="flex items-center gap-2">
+                      {/* {tech.icon && (
+                        <img 
+                          src={tech.icon} 
+                          alt={tech.name}
+                          className="h-4 w-4 object-contain"
+                        />
+                      )} */}
+                      <span className="text-sm">{tech.name}</span>
+                    </div>
+                    <button
                       type="button"
-                      variant="secondary"
-                      onClick={addSkill}
+                      onClick={() => removeTechnology(index)}
+                      className="text-muted-foreground hover:text-foreground"
                     >
-                      Add
-                    </Button>
+                      <X className="h-4 w-4" />
+                    </button>
                   </div>
-                  <div className="flex flex-wrap gap-2 mt-2">
-                    {form.watch("technologies").map((skill, index) => (
-                      <div
-                        key={index}
-                        className="flex items-center gap-1 px-2 py-1 bg-secondary rounded-md"
-                      >
-                        <span className="text-sm">{skill}</span>
-                        <button
-                          type="button"
-                          onClick={() => removeSkill(skill)}
-                          className="text-muted-foreground hover:text-foreground"
-                        >
-                          <X className="h-3 w-3" />
-                          <span className="sr-only">Remove {skill}</span>
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+                ))}
+              </div>
+            </div>
+
             <DialogFooter className="pt-4">
               <Button
                 variant="outline"
@@ -337,7 +407,12 @@ export function ProjectForm({
               >
                 Cancel
               </Button>
-              <Button type="submit" disabled={loading}>
+              <Button
+                variant="destructive"
+                className="text-white"
+                type="submit"
+                disabled={loading}
+              >
                 {loading
                   ? "Processing..."
                   : project

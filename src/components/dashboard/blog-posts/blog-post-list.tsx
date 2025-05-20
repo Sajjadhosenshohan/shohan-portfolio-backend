@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useState } from "react";
@@ -6,7 +7,6 @@ import {
   Newspaper,
   Pencil,
   Trash2,
-  Eye,
   CalendarIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -23,64 +23,93 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { BlogPostForm } from "./blog-post-form";
-import { useToast } from "@/hooks/use-toast";
 import { TBlog } from "@/types/blog.type";
+import { toast } from "sonner";
+import { addBlog, deleteBlog, updateBlog } from "@/services/blogs";
+import Image from "next/image";
+import DOMPurify from 'dompurify';
 
-interface BlogPost {
-  id: string;
-  title: string;
-  content: string;
-  excerpt: string;
-  imageUrl: string;
-  publishedAt: string;
-  status: "draft" | "published";
-  tags: string[];
-}
-
-export default function BlogPostList() {
-  const [posts, setPosts] = useState<BlogPost[]>([]);
-  const [postToEdit, setPostToEdit] = useState<BlogPost | null>(null);
+export default function BlogPostList({ blogs }: { blogs: TBlog[] }) {
+  const [postToEdit, setPostToEdit] = useState<TBlog | null>(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
-  const { toast } = useToast();
 
-  const handleCreatePost = (post: TBlog) => {};
+  const handleCreatePost = async (values: Partial<TBlog>) => {
+    const { blog_image, ...rest } = values;
+    const formData = new FormData();
+    formData.append("data", JSON.stringify(rest));
+    if (blog_image instanceof File) {
+      formData.append("file", blog_image);
+    }
 
-  const handleUpdatePost = (updatedPost: BlogPost) => {
-    setPosts(
-      posts.map((post) => (post.id === updatedPost.id ? updatedPost : post))
-    );
-
-    toast({
-      title:
-        updatedPost.status === "published" ? "Post updated" : "Draft updated",
-      description: "Your blog post has been updated successfully.",
-    });
-
-    setPostToEdit(null);
-    setIsFormOpen(false);
+    try {
+      const result = await addBlog(formData);
+      if (result.success) {
+        toast.success("Blog post added successfully");
+        setIsFormOpen(false);
+      } else {
+        toast.error(result.message || "Failed to add blog post");
+      }
+    } catch (error: any) {
+      toast.error(error.message || "Failed to add blog post");
+    }
   };
 
-  const handleDeletePost = (id: string) => {
-    setPosts(posts.filter((post) => post.id !== id));
+  const handleUpdatePost = async (updatedPostData: Partial<TBlog>) => {
+    const { blog_image, ...rest } = updatedPostData;
+    const formData = new FormData();
+    formData.append("data", JSON.stringify(rest));
+    if (blog_image instanceof File) {
+      formData.append("file", blog_image);
+    }
 
-    toast({
-      title: "Post deleted",
-      description: "The blog post has been deleted successfully.",
-    });
+    try {
+      const result = await updateBlog(formData);
+      if (result.success) {
+        toast.success("Blog post updated successfully");
+        setIsFormOpen(false);
+        setPostToEdit(null);
+      } else {
+        toast.error(result.message || "Failed to update blog post");
+      }
+    } catch (error: any) {
+      toast.error(error.message || "Failed to update blog post");
+    }
   };
 
-  const openEditForm = (post: BlogPost) => {
-    setPostToEdit(post);
+  const handleDeletePost = async (id: string | undefined) => {
+    if (!id) return;
+
+    try {
+      const result = await deleteBlog(id);
+      if (result.success) {
+        toast.success("Blog post deleted successfully");
+      } else {
+        toast.error(result.message || "Failed to delete blog post");
+      }
+    } catch (error: any) {
+      toast.error(error.message || "Failed to delete blog post");
+    }
+  };
+
+  const openEditForm = (post: TBlog) => {
+    setPostToEdit({
+      ...post,
+      blog_image: post.blog_image || "",
+      tags: post.tags || [],
+    });
     setIsFormOpen(true);
+  };
+
+  const sanitizeHtml = (html: string) => {
+    return DOMPurify.sanitize(html);
   };
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between">
-        <h2 className="text-xl font-semibold tracking-tight">
-          Your Blog Posts
-        </h2>
+      <div className="flex justify-end">
         <Button
+          variant="destructive"
+          className="text-white"
           onClick={() => {
             setPostToEdit(null);
             setIsFormOpen(true);
@@ -91,7 +120,7 @@ export default function BlogPostList() {
         </Button>
       </div>
 
-      {posts.length === 0 ? (
+      {blogs?.length === 0 ? (
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-10 space-y-4">
             <Newspaper className="h-12 w-12 text-muted-foreground/50" />
@@ -113,100 +142,108 @@ export default function BlogPostList() {
           </CardContent>
         </Card>
       ) : (
-        <div className="grid grid-cols-1 gap-4">
-          {posts.map((post) => (
-            <Card key={post.id} className="overflow-hidden">
-              <div className="grid grid-cols-1 md:grid-cols-[250px_1fr] gap-4">
-                <div className="aspect-video md:aspect-square w-full overflow-hidden bg-muted">
-                  {post.imageUrl ? (
-                    <img
-                      src={post.imageUrl}
-                      alt={post.title}
-                      className="h-full w-full object-cover"
-                    />
-                  ) : (
-                    <div className="flex h-full items-center justify-center bg-secondary">
-                      <Newspaper className="h-10 w-10 text-muted-foreground" />
-                    </div>
-                  )}
-                </div>
-                <div className="p-6">
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="flex gap-2">
-                      <span
-                        className={`px-2 py-1 text-xs rounded-full uppercase font-medium ${
-                          post.status === "published"
-                            ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100"
-                            : "bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-100"
-                        }`}
-                      >
-                        {post.status}
-                      </span>
-                      {post.tags.map((tag, i) => (
-                        <span
-                          key={i}
-                          className="px-2 py-1 text-xs bg-secondary rounded-full"
-                        >
-                          {tag}
-                        </span>
-                      ))}
-                    </div>
-                    <div className="flex items-center text-xs text-muted-foreground">
-                      <CalendarIcon className="h-3 w-3 mr-1" />
-                      {new Date(post.publishedAt).toLocaleDateString()}
-                    </div>
+        <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
+          {blogs?.map((blog) => (
+            <Card key={blog.id} className="overflow-hidden flex flex-col">
+              <div className="aspect-video w-full overflow-hidden bg-muted">
+                {blog.blog_image ? (
+                  <Image
+                    width={500}
+                    height={500}
+                    src={
+                      typeof blog?.blog_image === "string"
+                        ? blog?.blog_image
+                        : URL.createObjectURL(blog?.blog_image)
+                    }
+                    alt={blog?.title || "Blog Image"}
+                    className="h-full w-full object-fill"
+                  />
+                ) : (
+                  <div className="flex h-full items-center justify-center bg-secondary">
+                    <Newspaper className="h-10 w-10 text-muted-foreground" />
                   </div>
-
-                  <h3 className="font-semibold text-lg">{post.title}</h3>
-                  <p className="text-sm text-muted-foreground line-clamp-2 mt-1">
-                    {post.excerpt}
-                  </p>
-
-                  <div className="flex gap-2 mt-4 pt-4 border-t">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="flex-1"
-                      onClick={() => openEditForm(post)}
+                )}
+              </div>
+              <div className="p-6 flex flex-col flex-grow">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex gap-2 flex-wrap">
+                    <span
+                      className={`px-2 py-1 text-xs rounded-full uppercase font-medium ${
+                        blog.status === "PUBLISHED"
+                          ? "bg-green-100 text-green-800"
+                          : blog.status === "DRAFT"
+                          ? "bg-amber-100 text-amber-800"
+                          : "bg-gray-100 text-gray-800"
+                      }`}
                     >
-                      <Pencil className="h-4 w-4 mr-1" />
-                      Edit
-                    </Button>
-                    <Button variant="outline" size="sm" className="flex-1">
-                      <Eye className="h-4 w-4 mr-1" />
-                      Preview
-                    </Button>
-                    <AlertDialog>
-                      <AlertDialogTrigger asChild>
-                        <Button
-                          variant="destructive"
-                          size="sm"
-                          className="flex-1"
-                        >
-                          <Trash2 className="h-4 w-4 mr-1" />
-                          Delete
-                        </Button>
-                      </AlertDialogTrigger>
-                      <AlertDialogContent>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>Delete Blog Post</AlertDialogTitle>
-                          <AlertDialogDescription>
-                            Are you sure you want to delete this blog post? This
-                            action cannot be undone.
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel>Cancel</AlertDialogCancel>
-                          <AlertDialogAction
-                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                            onClick={() => handleDeletePost(post.id)}
-                          >
-                            Delete
-                          </AlertDialogAction>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
+                      {blog.status}
+                    </span>
+                    {blog.tags.slice(0, 2).map((tag, i) => (
+                      <span
+                        key={i}
+                        className="px-2 py-1 text-xs bg-secondary rounded-full"
+                      >
+                        {tag}
+                      </span>
+                    ))}
                   </div>
+                  <div className="flex items-center text-xs text-muted-foreground whitespace-nowrap">
+                    <CalendarIcon className="h-3 w-3 mr-1" />
+                    {new Date(blog.createdAt).toLocaleDateString()}
+                  </div>
+                </div>
+
+                <h3 className="font-semibold text-lg line-clamp-2">
+                  {blog.title}
+                </h3>
+                <div
+                  className="text-sm line-clamp-3 prose prose-sm prose-headings:font-medium prose-a:text-blue-600 max-w-none"
+                  dangerouslySetInnerHTML={{
+                    __html: sanitizeHtml(blog.short_description),
+                  }}
+                />
+
+                <div className="flex gap-2 mt-4 pt-4 border-t">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="flex-1"
+                    onClick={() => openEditForm(blog)}
+                  >
+                    <Pencil className="h-4 w-4 mr-1" />
+                    Edit
+                  </Button>
+
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        className="flex-1 text-white"
+                      >
+                        <Trash2 className="h-4 w-4 mr-1" />
+                        Delete
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Delete Blog Post</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Are you sure you want to delete this blog post? This
+                          action cannot be undone.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction
+                          className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                          onClick={() => handleDeletePost(blog.id)}
+                        >
+                          Delete
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
                 </div>
               </div>
             </Card>
@@ -216,7 +253,12 @@ export default function BlogPostList() {
 
       <BlogPostForm
         open={isFormOpen}
-        onOpenChange={setIsFormOpen}
+        onOpenChange={(open) => {
+          if (!open) {
+            setPostToEdit(null);
+          }
+          setIsFormOpen(open);
+        }}
         post={postToEdit}
         onSubmit={postToEdit ? handleUpdatePost : handleCreatePost}
       />

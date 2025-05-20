@@ -1,30 +1,30 @@
 "use client";
 import { Activity } from "lucide-react";
 
-interface RecentActivityItemProps {
-  icon: React.ReactNode;
-  title: string;
-  description: string;
-  timestamp: string;
-}
+// interface RecentActivityItemProps {
+//   icon: React.ReactNode;
+//   title: string;
+//   description: string;
+//   timestamp: string;
+// }
 
-function RecentActivityItem({
-  icon,
-  title,
-  description,
-  timestamp,
-}: RecentActivityItemProps) {
-  return (
-    <div className="flex items-start gap-4 rounded-lg border p-4">
-      <div className="rounded-full border p-2">{icon}</div>
-      <div className="flex-1 space-y-1">
-        <p className="text-sm font-medium leading-none">{title}</p>
-        <p className="text-sm text-muted-foreground">{description}</p>
-        <p className="text-xs text-muted-foreground">{timestamp}</p>
-      </div>
-    </div>
-  );
-}
+// function RecentActivityItem({
+//   icon,
+//   title,
+//   description,
+//   timestamp,
+// }: RecentActivityItemProps) {
+//   return (
+//     <div className="flex items-start gap-4 rounded-lg border p-4">
+//       <div className="rounded-full border p-2">{icon}</div>
+//       <div className="flex-1 space-y-1">
+//         <p className="text-sm font-medium leading-none">{title}</p>
+//         <p className="text-sm text-muted-foreground">{description}</p>
+//         <p className="text-xs text-muted-foreground">{timestamp}</p>
+//       </div>
+//     </div>
+//   );
+// }
 
 export function RecentActivity() {
   return (

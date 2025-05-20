@@ -1,7 +1,7 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use server";
 import { cookies } from "next/headers";
 import { revalidateTag } from "next/cache";
-import { TMessage } from "@/types/message.type";
 import { TResume } from "@/types/resume.type";
 
 export const getAllResume = async () => {
@@ -20,16 +20,19 @@ export const getAllResume = async () => {
   }
 };
 
-export const addResume = async (resumeData: FormData) => {
+export const addResume = async (resumeData:Partial<TResume>) => {
   try {
+    
+    console.log(resumeData)
     const res = await fetch(
       `${process.env.NEXT_PUBLIC_BASE_API}/resume/add-resume`,
       {
         method: "POST",
         headers: {
+          "Content-Type": "application/json",
           Authorization: (await cookies()).get("accessToken")?.value || "",
         },
-        body: resumeData,
+        body: JSON.stringify(resumeData),
       }
     );
 
@@ -62,23 +65,19 @@ export const deleteResume = async (resumeId: string) => {
   }
 };
 
-export const updateResume = async (resume:Partial<TResume>, file?: File) => {
-  const formData = new FormData();
-  formData.append("data", JSON.stringify({ ...resume }));
-  if (file) {
-    formData.append("file", file);
-  }
+export const updateResume = async (resume:Partial<TResume>) => {
 
-  console.log(Object.fromEntries(formData.entries()));
   try {
+    console.log(resume)
     const res = await fetch(
       `${process.env.NEXT_PUBLIC_BASE_API}/resume/update-resume`,
       {
         method: "PUT",
         headers: {
+          "Content-Type": "application/json",
           Authorization: (await cookies()).get("accessToken")?.value || "",
         },
-        body: formData,
+        body: JSON.stringify(resume),
       }
     );
 

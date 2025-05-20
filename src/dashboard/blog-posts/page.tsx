@@ -1,12 +1,15 @@
 import { Metadata } from "next";
 import BlogPostList from "@/components/dashboard/blog-posts/blog-post-list";
+import { getAllBlog } from "@/services/blogs";
 
 export const metadata: Metadata = {
   title: "Blog Posts - Portfolio Dashboard",
   description: "Manage your blog posts",
 };
 
-export default function BlogPostsPage() {
+export default async function BlogPostsPage() {
+  const blogPosts = await getAllBlog();
+  const data = blogPosts.data;
   return (
     <div className="space-y-6">
       <div>
@@ -15,7 +18,7 @@ export default function BlogPostsPage() {
           Create and manage your blog content
         </p>
       </div>
-      <BlogPostList />
+      <BlogPostList blogs={data}/>
     </div>
   );
 }
