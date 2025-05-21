@@ -131,6 +131,8 @@ export default function BlogPostList({ blogs }: { blogs: TBlog[] }) {
               </p>
             </div>
             <Button
+            variant={'destructive'}
+            className="text-white"
               onClick={() => {
                 setPostToEdit(null);
                 setIsFormOpen(true);
