@@ -11,7 +11,7 @@ import {
   LucideIcon,
   Wrench,
   FileText,
-  LayoutDashboard,
+  // LayoutDashboard,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
@@ -29,11 +29,11 @@ interface DashboardNavProps {
 }
 
 const navItems: NavItem[] = [
-  {
-    title: "Dashboard",
-    href: "/dashboard",
-    icon: LayoutDashboard,
-  },
+  // {
+  //   title: "Dashboard",
+  //   href: "/dashboard",
+  //   icon: LayoutDashboard,
+  // },
   {
     title: "Resumes",
     href: "/dashboard/resumes",
@@ -82,7 +82,7 @@ export default function DashboardNav({ setOpen }: DashboardNavProps) {
               className={cn(
                 buttonVariants({ variant: "ghost" }),
                 pathname === item.href
-                  ? "bg-muted hover:bg-muted"
+                  ? "bg-muted text-red-600 hover:bg-muted"
                   : "hover:bg-transparent hover:underline",
                 "justify-start"
               )}

@@ -80,6 +80,7 @@ export const updateResume = async (resume:Partial<TResume>) => {
         body: JSON.stringify(resume),
       }
     );
+     revalidateTag("resume");
 
     const result = await res.json();
     console.log("result", result);
@@ -100,6 +101,7 @@ export const getResumeDetails = async (resumeId: string) => {
         },
       }
     );
+     revalidateTag("resume");
 
     const result = await res.json();
     return result;

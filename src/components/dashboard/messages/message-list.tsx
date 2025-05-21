@@ -72,18 +72,13 @@ export default function MessageList({ messages }: { messages: TMessage[] }) {
         )} */}
       </div>
 
-      {messages.length === 0 ? (
-        <Card>
-          <CardContent className="flex flex-col items-center justify-center py-10 space-y-4">
-            <MessageSquare className="h-12 w-12 text-muted-foreground/50" />
-            <div className="text-center space-y-2">
+      {messages?.length === 0 ? (
+        <div className="text-center space-y-2">
               <h3 className="text-lg font-medium">No messages yet</h3>
               <p className="text-sm text-muted-foreground max-w-md">
                 Messages sent through your contact form will appear here
               </p>
             </div>
-          </CardContent>
-        </Card>
       ) : (
         <div className="space-y-4">
           {messages?.map((message:TMessage) => (

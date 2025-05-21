@@ -6,7 +6,6 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -44,7 +43,6 @@ export default function LoginForm() {
     },
   });
 
-  console.log(form)
 
   async function onSubmit(data: LoginFormValues) {
     setIsLoading(true);
@@ -55,7 +53,7 @@ export default function LoginForm() {
 
         const decodedToken: any = await decodeToken(res.data.accessToken);
         await setUser(decodedToken);
-        router.push("/dashboard");
+        router.push("/dashboard/messages");
       } else {
         toast.error(res.message || "Login failed");
       }
@@ -97,7 +95,7 @@ export default function LoginForm() {
               </FormItem>
             )}
           />
-          <Button type="submit" className="w-full" disabled={isLoading}>
+          <Button variant={'destructive'} type="submit" className="w-full text-white" disabled={isLoading}>
             {isLoading ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -109,14 +107,14 @@ export default function LoginForm() {
           </Button>
         </form>
       </Form>
-      <div className="text-center text-sm">
+      {/* <div className="text-center text-sm">
         <p className="text-muted-foreground">
           Don&apos;t have an account?{" "}
           <Link href="/auth/register" className="underline text-primary">
             Register
           </Link>
         </p>
-      </div>
+      </div> */}
     </div>
   );
 }

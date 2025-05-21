@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { Outfit } from "next/font/google";
 import { Toaster } from "sonner";
-import { ThemeProvider } from "@/providers/theme-provider";
+// import { ThemeProvider } from "@/providers/theme-provider";
 import Provider from "@/providers/Providers";
 
 const outfit = Outfit({
@@ -33,17 +33,17 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={outfit.className}>
-        <ThemeProvider
+        {/* <ThemeProvider
           attribute="class"
           defaultTheme="system"
           enableSystem
           disableTransitionOnChange
-        >
+        > */}
           <Provider>
             <Toaster position="top-center" richColors />
             {children}
           </Provider>
-        </ThemeProvider>
+        {/* </ThemeProvider> */}
       </body>
     </html>
   );
