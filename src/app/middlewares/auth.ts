@@ -19,7 +19,6 @@ const auth = (...roles: string[]) => {
         token,
         config.JWT.JWT_ACCESS_SECRET as Secret,
       );
-
       
       if (roles.length && !roles.includes(verifyUser.role)) {
         throw new AppError(status.UNAUTHORIZED, 'You are not authorized!');

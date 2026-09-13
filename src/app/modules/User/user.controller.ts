@@ -33,7 +33,7 @@ const getAllUsersFromDB = catchAsync(async (req, res) => {
 });
 
 const getUserByIdFromDB = catchAsync(async (req, res) => {
-  const { id } = req.params;
+  const id = req.params.id as string;
   const result = await UserService.getUserByIdFromDB(id);
 
   sendResponse(res, {
@@ -56,7 +56,7 @@ const getUserByIdFromDB = catchAsync(async (req, res) => {
 // });
 
 const updateIntoDB = catchAsync(async (req, res) => {
-  const { id } = req.params;
+  const id = req.params.id as string;
   const payload = req.body;
   const result = await UserService.updateIntoDB(id, payload);
 
@@ -69,7 +69,7 @@ const updateIntoDB = catchAsync(async (req, res) => {
 });
 
 const deleteFromDB = catchAsync(async (req, res) => {
-  const { id } = req.params;
+  const id = req.params.id as string;
   const result = await UserService.deleteFromDB(id);
 
   sendResponse(res, {
@@ -81,7 +81,7 @@ const deleteFromDB = catchAsync(async (req, res) => {
 });
 
 const softDeleteFromDB = catchAsync(async (req, res) => {
-  const { id } = req.params;
+  const id = req.params.id as string;
   const result = await UserService.softDeleteFromDB(id);
 
   sendResponse(res, {

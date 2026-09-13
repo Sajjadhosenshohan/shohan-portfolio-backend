@@ -11,9 +11,15 @@ router.post(
   auth(UserRole.ADMIN),
   multerImageUpload.single("file"),
   (req: Request, res: Response, next: NextFunction) => {
-    req.body = JSON.parse(req.body.data);
-    if (req.file) {
-      req.body.blog_image = req?.file?.path;
+    if (typeof req.body.data === "string") {
+      try {
+        req.body = JSON.parse(req.body.data);
+      } catch (e) {
+        // use req.body as is
+      }
+    }
+    if (req.file?.path) {
+      req.body.blog_image = req.file.path;
     }
     next();
   },
@@ -30,9 +36,15 @@ router.put(
   auth(UserRole.ADMIN),
   multerImageUpload.single("file"),
   (req: Request, res: Response, next: NextFunction) => {
-    req.body = JSON.parse(req.body.data);
-    if (req.file) {
-      req.body.blog_image = req?.file?.path;
+    if (typeof req.body.data === "string") {
+      try {
+        req.body = JSON.parse(req.body.data);
+      } catch (e) {
+        // use req.body as is
+      }
+    }
+    if (req.file?.path) {
+      req.body.blog_image = req.file.path;
     }
     next();
   },

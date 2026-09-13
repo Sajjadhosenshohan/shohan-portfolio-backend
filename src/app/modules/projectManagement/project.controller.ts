@@ -23,9 +23,8 @@ const getAllProjectData = catchAsync(async (req, res) => {
   });
 });
 const deleteProjectData = catchAsync(async (req, res) => {
-  const id = req.query.projectId as string ;
+  const id = (req.query.projectId || req.query.id) as string;
   const result = await projectServices.deletedProjectIntoDB(id);
-  // console.log(result);
   sendResponse(res, {
     statusCode: StatusCodes.OK,
     success: true,

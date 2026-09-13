@@ -149,7 +149,7 @@ const ResumeGets = {
         responseType: "stream",
       });
 
-      const contentType = response.headers["content-type"];
+      const contentType = String(response.headers["content-type"] || "");
       if (!contentType.includes("pdf")) {
         return res
           .status(400)

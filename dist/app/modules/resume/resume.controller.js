@@ -17,38 +17,33 @@ const http_status_codes_1 = require("http-status-codes");
 const catchAsync_1 = __importDefault(require("../../utils/catchAsync"));
 const sendResponse_1 = __importDefault(require("../../utils/sendResponse"));
 const resume_service_1 = require("./resume.service");
-const uuid_1 = require("uuid");
-const path_1 = __importDefault(require("path"));
-const fs_1 = __importDefault(require("fs"));
 const axios_1 = __importDefault(require("axios"));
 const addResumeIntoDB = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a;
-    const data = JSON.parse((_a = req === null || req === void 0 ? void 0 : req.body) === null || _a === void 0 ? void 0 : _a.data);
-    console.log("Controller data:", data);
-    if (req.file) {
-        const uploadsDir = path_1.default.join(process.cwd(), "public/resumes");
-        // Ensure directory exists
-        if (!fs_1.default.existsSync(uploadsDir)) {
-            try {
-                fs_1.default.mkdirSync(uploadsDir, { recursive: true });
-            }
-            catch (error) {
-                throw new Error(`Failed to create uploads directory: ${error.message}`);
-            }
-        }
-        const uniqueFilename = `${(0, uuid_1.v4)()}-${req.file.originalname}`;
-        const filePath = path_1.default.join(uploadsDir, uniqueFilename);
-        // Save file asynchronously
-        try {
-            yield fs_1.default.promises.writeFile(filePath, req.file.buffer);
-            console.log("File saved at:", filePath);
-            data.pdfUrl = `/api/resumes/${uniqueFilename}`;
-            console.log("File URL sdfh:", data.pdfUrl);
-        }
-        catch (error) {
-            throw new Error(`Failed to save file: ${error.message}`);
-        }
-    }
+    const data = req === null || req === void 0 ? void 0 : req.body;
+    // if (req.file) {
+    //   const uploadsDir = path.join(process.cwd(), "public/resumes");
+    //   // Ensure directory exists
+    //   if (!fs.existsSync(uploadsDir)) {
+    //     try {
+    //       fs.mkdirSync(uploadsDir, { recursive: true });
+    //     } catch (error) {
+    //       throw new Error(
+    //         `Failed to create uploads directory: ${(error as Error).message}`
+    //       );
+    //     }
+    //   }
+    //   const uniqueFilename = `${uuidv4()}-${req.file.originalname}`;
+    //   const filePath = path.join(uploadsDir, uniqueFilename);
+    //   // Save file asynchronously
+    //   try {
+    //     await fs.promises.writeFile(filePath, req.file.buffer);
+    //     console.log("File saved at:", filePath);
+    //     data.pdfUrl = `/api/resumes/${uniqueFilename}`;
+    //     console.log("File URL sdfh:", data.pdfUrl);
+    //   } catch (error) {
+    //     throw new Error(`Failed to save file: ${(error as Error).message}`);
+    //   }
+    // }
     // if (req.file) {
     //      // Instead of saving to filesystem, pass the buffer to the service
     //     //  data.pdfBuffer = req.file.buffer;
@@ -83,33 +78,31 @@ const getAllResumeDataFromDB = (0, catchAsync_1.default)((req, res) => __awaiter
 //   });
 // });
 exports.updateResumeFromDB = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a;
-    const data = JSON.parse((_a = req === null || req === void 0 ? void 0 : req.body) === null || _a === void 0 ? void 0 : _a.data);
-    console.log("Controller data:", data, req.file);
-    if (req.file) {
-        const uploadsDir = path_1.default.join(process.cwd(), "public/resumes");
-        // Ensure directory exists
-        if (!fs_1.default.existsSync(uploadsDir)) {
-            try {
-                fs_1.default.mkdirSync(uploadsDir, { recursive: true });
-            }
-            catch (error) {
-                throw new Error(`Failed to create uploads directory: ${error.message}`);
-            }
-        }
-        const uniqueFilename = `${(0, uuid_1.v4)()}-${req.file.originalname}`;
-        const filePath = path_1.default.join(uploadsDir, uniqueFilename);
-        // Save file asynchronously
-        try {
-            yield fs_1.default.promises.writeFile(filePath, req.file.buffer);
-            // console.log("File saved at:", filePath);
-            data.pdfUrl = `/api/resumes/${uniqueFilename}`;
-            // console.log("File URL sdfh:", skillInfo.pdfUrl);
-        }
-        catch (error) {
-            throw new Error(`Failed to save file: ${error.message}`);
-        }
-    }
+    const data = req === null || req === void 0 ? void 0 : req.body;
+    // if (req.file) {
+    //   const uploadsDir = path.join(process.cwd(), "public/resumes");
+    //   // Ensure directory exists
+    //   if (!fs.existsSync(uploadsDir)) {
+    //     try {
+    //       fs.mkdirSync(uploadsDir, { recursive: true });
+    //     } catch (error) {
+    //       throw new Error(
+    //         `Failed to create uploads directory: ${(error as Error).message}`
+    //       );
+    //     }
+    //   }
+    //   const uniqueFilename = `${uuidv4()}-${req.file.originalname}`;
+    //   const filePath = path.join(uploadsDir, uniqueFilename);
+    //   // Save file asynchronously
+    //   try {
+    //     await fs.promises.writeFile(filePath, req.file.buffer);
+    //     // console.log("File saved at:", filePath);
+    //     data.pdfUrl = `/api/resumes/${uniqueFilename}`;
+    //     // console.log("File URL sdfh:", skillInfo.pdfUrl);
+    //   } catch (error) {
+    //     throw new Error(`Failed to save file: ${(error as Error).message}`);
+    //   }
+    // }
     const result = yield resume_service_1.ResumeServices.updateResumeFromDB(data);
     (0, sendResponse_1.default)(res, {
         statusCode: http_status_codes_1.StatusCodes.OK,
@@ -144,7 +137,7 @@ const ResumeGets = {
             const response = yield axios_1.default.get(pdfUrl, {
                 responseType: "stream",
             });
-            const contentType = response.headers["content-type"];
+            const contentType = String(response.headers["content-type"] || "");
             if (!contentType.includes("pdf")) {
                 return res
                     .status(400)

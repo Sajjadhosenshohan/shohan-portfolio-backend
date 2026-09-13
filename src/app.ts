@@ -9,16 +9,18 @@ const app: Application = express();
 
 const corseOptions = {
   origin: [
-    'http://localhost:3000'
+    'http://localhost:3000',
+    'http://localhost:3001',
+    'http://localhost:3002',
   ],
   credentials: true,
 };
 
 app.use(cors(corseOptions));
-// Serve static files from public/resumes
-// const uploadsDir = path.join(process.cwd(), "public/resumes");
-// console.log("Serving static files from:", uploadsDir);
-// app.use("/api/resumes", express.static(uploadsDir));
+
+// Serve static files from public/uploads
+app.use('/uploads', express.static(path.join(process.cwd(), 'public/uploads')));
+
 
 // parder
 app.use(cookieParser());
@@ -26,7 +28,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // application routes
-app.use('/api', router);
+app.use('/api/v1', router);
 
 app.get('/', (req: Request, res: Response) => {
   res.send({

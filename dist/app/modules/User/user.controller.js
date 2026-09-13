@@ -42,7 +42,7 @@ const getAllUsersFromDB = (0, catchAsync_1.default)((req, res) => __awaiter(void
     });
 }));
 const getUserByIdFromDB = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { id } = req.params;
+    const id = req.params.id;
     const result = yield user_service_1.UserService.getUserByIdFromDB(id);
     (0, sendResponse_1.default)(res, {
         statusCode: http_status_1.default.OK,
@@ -61,7 +61,7 @@ const getUserByIdFromDB = (0, catchAsync_1.default)((req, res) => __awaiter(void
 //   });
 // });
 const updateIntoDB = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { id } = req.params;
+    const id = req.params.id;
     const payload = req.body;
     const result = yield user_service_1.UserService.updateIntoDB(id, payload);
     (0, sendResponse_1.default)(res, {
@@ -72,7 +72,7 @@ const updateIntoDB = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, v
     });
 }));
 const deleteFromDB = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { id } = req.params;
+    const id = req.params.id;
     const result = yield user_service_1.UserService.deleteFromDB(id);
     (0, sendResponse_1.default)(res, {
         statusCode: http_status_1.default.OK,
@@ -82,7 +82,7 @@ const deleteFromDB = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, v
     });
 }));
 const softDeleteFromDB = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { id } = req.params;
+    const id = req.params.id;
     const result = yield user_service_1.UserService.softDeleteFromDB(id);
     (0, sendResponse_1.default)(res, {
         statusCode: http_status_1.default.OK,

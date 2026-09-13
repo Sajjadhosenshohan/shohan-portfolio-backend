@@ -1,113 +1,79 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "mongodb"
   url      = env("DATABASE_URL")
 }
 
 model User {
-  id           String   @id @default(uuid())
-  name         String
-  email          String  @unique
-  password   String
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  name          String
+  email         String   @unique
+  password      String
   profile_image String?
-  role UserRole @default(USER)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  role          UserRole @default(USER)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
-  blog   Blog[]
+  blog Blog[]
 
   @@map("users")
 }
 
-// model Project {
-//   id                String @id @default(uuid())
-//   title             String
-//   live_link         String
-//   client_link       String
-//   server_link       String
-//   description String
-//   technologies        String[]
-//   project_image             String
-
-//   authorId String
-//   author   User @relation(fields: [authorId], references: [id], onUpdate: Cascade, onDelete: Cascade)
-
-//   createdAt DateTime @default(now())
-//   updatedAt DateTime @updatedAt
-//   @@map("projects")
-// }
-
-// type TTechnology ={
-//   // id: string;
-//   name: string;
-//   icon?: string;
-// }
-// export type TProject = {
-//   id: string;
-//   title: string;
-//   description: string;
-//   features?: string[];
-//   project_image?: string | null;
-//   client_link?: string;
-//   server_link?: string;
-//   live_link?: string;
-//   technologies?: TTechnology[];
-//   authorId?: string;
-//   createdAt: string;
-//   updatedAt: string;
-// };
-
 model Project {
-  id            String     @id @default(uuid())
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
   title         String
   description   String
-  features      String[]   // Optional: can be omitted if not used
-  project_image String?    // Optional
-  client_link   String
-  server_link   String
+  features      String[] // Optional: can be omitted if not used
+  project_image String? // Optional
+  client_link   String?
+  server_link   String?
   live_link     String
+  video_url     String? // Optional demo/walkthrough video URL
+  tags          String[] // e.g. ["Own Project", "Client Project", "Team Project"]
+  sortOrder     Int      @default(0)
 
-  technologies  Technology[] // One-to-many relationship
+  technologies Technology[] // One-to-many relationship
 
-  createdAt     DateTime   @default(now())
-  updatedAt     DateTime   @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@map("projects")
 }
+
 model Technology {
-  id        String   @id @default(uuid())
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
   name      String
-  icon      String?  
+  icon      String?
   project   Project? @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  projectId String?
+  projectId String?  @db.ObjectId
 
   @@map("technologies")
 }
 
 model Blog {
-  id                String   @id @default(uuid())
+  id                String     @id @default(auto()) @map("_id") @db.ObjectId
   title             String
   short_description String
-  blog_image             String
+  blog_image        String
   status            BlogStatus @default(DRAFT)
   publishDate       DateTime?
 
-  tags              String[] // array of tags like ["React", "Tutorial", "JS"]
+  tags      String[] // array of tags like ["React", "Tutorial", "JS"]
+  video_url String? // Optional video link for the blog
+  sortOrder Int      @default(0)
 
-  authorId String
-  author   User   @relation(fields: [authorId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  authorId String @db.ObjectId
+  author   User   @relation(fields: [authorId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
   @@map("blogs")
 }
 
@@ -117,13 +83,10 @@ enum BlogStatus {
   ARCHIVED
 }
 
-
 model Message {
-  id        String   @id @default(uuid())
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
   name      String
   email     String
-  // phone     String?
-  // subject   String?
   message   String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -132,29 +95,29 @@ model Message {
 }
 
 model Resume {
-  id        String   @id @default(uuid())
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
   title     String
   pdfUrl    String
-  publicId  String?  
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  isActive  Boolean   @default(false) 
+  publicId  String?
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  isActive  Boolean  @default(false)
 
   @@map("resumes")
 }
 
 model Skill {
-  id        String   @id @default(uuid())
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
   name      String
   category  String
-  // Optional: Beginner, Intermediate, Expert // level     String 
   image     String? // Skill icon URL (e.g. Cloudinary or local link)
+  sortOrder Int      @default(0)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@map("skills")
 }
-
 
 enum UserRole {
   ADMIN

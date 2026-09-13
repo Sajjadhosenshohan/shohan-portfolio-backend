@@ -7,11 +7,13 @@ exports.upload = exports.multerImageUpload = void 0;
 const multer_1 = __importDefault(require("multer"));
 const multer_storage_cloudinary_1 = require("multer-storage-cloudinary");
 const cloudinary_config_1 = require("./cloudinary,config");
-// For image uploads (default)
+// Direct upload to Cloudinary
 const imageStorage = new multer_storage_cloudinary_1.CloudinaryStorage({
     cloudinary: cloudinary_config_1.cloudinaryUpload,
+    params: {
+        folder: 'portfolio',
+    },
 });
 exports.multerImageUpload = (0, multer_1.default)({ storage: imageStorage });
-// For
 const storage = multer_1.default.memoryStorage();
 exports.upload = (0, multer_1.default)({ storage });

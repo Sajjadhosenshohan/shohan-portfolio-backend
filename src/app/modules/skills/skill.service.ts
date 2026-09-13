@@ -9,7 +9,9 @@ const addSkillsIntoDB = async (payload: Skill) => {
 };
 
 const getAllSkillDataFromDB = async () => {
-  const result = await prisma.skill.findMany();
+  const result = await prisma.skill.findMany({
+    orderBy: { sortOrder: 'asc' },
+  });
   return result;
 };
 

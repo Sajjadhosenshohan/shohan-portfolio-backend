@@ -12,20 +12,27 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const app_1 = __importDefault(require("./app"));
-const config_1 = __importDefault(require("./app/config"));
-const seed_1 = require("./app/seed");
-function main() {
-    return __awaiter(this, void 0, void 0, function* () {
-        try {
-            yield (0, seed_1.seedDatabase)();
-            app_1.default.listen(config_1.default.PORT, () => {
-                console.log('App is listening on port', config_1.default.PORT);
-            });
-        }
-        catch (err) {
-            console.log(err);
-        }
-    });
-}
-main();
+exports.ReorderServices = void 0;
+const prisma_1 = __importDefault(require("../../shared/prisma"));
+const reorderEntities = (entity, orderedIds) => __awaiter(void 0, void 0, void 0, function* () {
+    const modelMap = {
+        resume: prisma_1.default.resume,
+        project: prisma_1.default.project,
+        blog: prisma_1.default.blog,
+        skill: prisma_1.default.skill,
+    };
+    const model = modelMap[entity];
+    if (!model) {
+        throw new Error(`Invalid entity: ${entity}`);
+    }
+    // Use a transaction to update all sortOrders atomically
+    const updates = orderedIds.map((id, index) => model.update({
+        where: { id },
+        data: { sortOrder: index },
+    }));
+    yield prisma_1.default.$transaction(updates);
+    return { message: `${entity} order updated successfully` };
+});
+exports.ReorderServices = {
+    reorderEntities,
+};

@@ -7,6 +7,8 @@ export default {
   NODE_ENV: process.env.NODE_ENV,
   PORT: process.env.PORT,
   BCRYPT_SALt_ROUNDS: process.env.BCRYPT_SALt_ROUNDS,
+  ADMIN_EMAIL: process.env.ADMIN_EMAIL,
+  ADMIN_PASSWORD: process.env.ADMIN_PASSWORD,
   JWT: {
     JWT_ACCESS_SECRET: process.env.JWT_ACCESS_SECRET,
     JWT_REFRESH_SECRET: process.env.JWT_REFRESH_SECRET,

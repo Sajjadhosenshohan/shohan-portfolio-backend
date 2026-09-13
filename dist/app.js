@@ -13,21 +13,21 @@ const globalErrorHandler_1 = require("./app/error/globalErrorHandler");
 const app = (0, express_1.default)();
 const corseOptions = {
     origin: [
-        'http://localhost:3000'
+        'http://localhost:3000',
+        'http://localhost:3001',
+        'http://localhost:3002',
     ],
     credentials: true,
 };
 app.use((0, cors_1.default)(corseOptions));
-// Serve static files from public/resumes
-const uploadsDir = path_1.default.join(process.cwd(), "public/resumes");
-console.log("Serving static files from:", uploadsDir);
-app.use("/api/resumes", express_1.default.static(uploadsDir));
+// Serve static files from public/uploads
+app.use('/uploads', express_1.default.static(path_1.default.join(process.cwd(), 'public/uploads')));
 // parder
 app.use((0, cookie_parser_1.default)());
 app.use(express_1.default.json());
 app.use(express_1.default.urlencoded({ extended: true }));
 // application routes
-app.use('/api', routes_1.default);
+app.use('/api/v1', routes_1.default);
 app.get('/', (req, res) => {
     res.send({
         status: true,

@@ -48,9 +48,8 @@ const getAllProjectData = (0, catchAsync_1.default)((req, res) => __awaiter(void
     });
 }));
 const deleteProjectData = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const id = req.query.projectId;
+    const id = (req.query.projectId || req.query.id);
     const result = yield project_service_1.projectServices.deletedProjectIntoDB(id);
-    // console.log(result);
     (0, sendResponse_1.default)(res, {
         statusCode: http_status_codes_1.StatusCodes.OK,
         success: true,

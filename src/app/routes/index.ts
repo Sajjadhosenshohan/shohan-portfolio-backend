@@ -6,6 +6,7 @@ import { AuthRoutes } from '../modules/Auth/auth.route';
 import { UserRoutes } from '../modules/User/user.route';
 import { SkillRoutes } from '../modules/skills/skill.route';
 import { ResumeRoutes } from '../modules/resume/resume.route';
+import { ReorderRoutes } from '../modules/reorder/reorder.route';
 
 const router = Router();
 
@@ -38,8 +39,13 @@ const moduleRoutes: { path: string; route: Router }[] = [
     path: '/message',
     route: MessageRoutes,
   },
+  {
+    path: '/reorder',
+    route: ReorderRoutes,
+  },
 ];
 
 moduleRoutes.forEach((route) => router.use(route.path, route.route));
 
 export default router;
+

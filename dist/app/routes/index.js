@@ -8,6 +8,7 @@ const auth_route_1 = require("../modules/Auth/auth.route");
 const user_route_1 = require("../modules/User/user.route");
 const skill_route_1 = require("../modules/skills/skill.route");
 const resume_route_1 = require("../modules/resume/resume.route");
+const reorder_route_1 = require("../modules/reorder/reorder.route");
 const router = (0, express_1.Router)();
 const moduleRoutes = [
     {
@@ -37,6 +38,10 @@ const moduleRoutes = [
     {
         path: '/message',
         route: contact_route_1.MessageRoutes,
+    },
+    {
+        path: '/reorder',
+        route: reorder_route_1.ReorderRoutes,
     },
 ];
 moduleRoutes.forEach((route) => router.use(route.path, route.route));

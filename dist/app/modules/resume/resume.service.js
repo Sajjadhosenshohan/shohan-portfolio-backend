@@ -26,17 +26,24 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.ResumeServices = void 0;
 const prisma_1 = __importDefault(require("../../shared/prisma"));
 const addResumeIntoDB = (payload) => __awaiter(void 0, void 0, void 0, function* () {
+    const { id, createdAt, updatedAt } = payload, rest = __rest(payload, ["id", "createdAt", "updatedAt"]);
+    if (rest.isActive) {
+        yield prisma_1.default.resume.updateMany({
+            data: { isActive: false },
+        });
+    }
     const result = yield prisma_1.default.resume.create({
-        data: payload,
+        data: rest,
     });
     return result;
 });
 const getAllResumeDataFromDB = () => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield prisma_1.default.resume.findMany();
+    const result = yield prisma_1.default.resume.findMany({
+        orderBy: { sortOrder: 'asc' },
+    });
     return result;
 });
 const deleteResumeFromDB = (id) => __awaiter(void 0, void 0, void 0, function* () {
-    console.log(id);
     yield prisma_1.default.resume.findUniqueOrThrow({
         where: {
             id,
@@ -45,17 +52,25 @@ const deleteResumeFromDB = (id) => __awaiter(void 0, void 0, void 0, function* (
     const result = yield prisma_1.default.resume.delete({
         where: {
             id,
-        }
+        },
     });
     return result;
 });
 const updateResumeFromDB = (payload) => __awaiter(void 0, void 0, void 0, function* () {
-    const { id } = payload, rest = __rest(payload, ["id"]);
+    const { id, createdAt, updatedAt } = payload, rest = __rest(payload, ["id", "createdAt", "updatedAt"]);
     yield prisma_1.default.resume.findUniqueOrThrow({
         where: {
             id,
         },
     });
+    if (rest.isActive) {
+        yield prisma_1.default.resume.updateMany({
+            where: {
+                id: { not: id },
+            },
+            data: { isActive: false },
+        });
+    }
     const result = yield prisma_1.default.resume.update({
         where: {
             id,
@@ -68,5 +83,5 @@ exports.ResumeServices = {
     addResumeIntoDB,
     getAllResumeDataFromDB,
     deleteResumeFromDB,
-    updateResumeFromDB
+    updateResumeFromDB,
 };

@@ -11,6 +11,8 @@ const prismaErrorHandler_1 = require("./prismaErrorHandler");
 const AppError_1 = __importDefault(require("./AppError"));
 const isDevelopment = process.env.NODE_ENV === "development";
 const globalErrorHandler = (error, _req, res, _next) => {
+    var _a;
+    console.error("GLOBAL ERROR CAUGHT:", error);
     let statusCode = 500;
     let message = "Something went wrong!";
     let errorDetails = undefined;
@@ -35,10 +37,15 @@ const globalErrorHandler = (error, _req, res, _next) => {
         statusCode = error.statusCode;
         message = error.message;
     }
-    // Handle Generic Error
+    // Handle Generic Error or Object with message
     else if (error instanceof Error) {
         message = error.message || message;
-        statusCode = error.statusCode || statusCode;
+        statusCode = error.statusCode || error.http_code || statusCode;
+    }
+    else if (error && typeof error === "object") {
+        const errObj = error;
+        message = ((_a = errObj.error) === null || _a === void 0 ? void 0 : _a.message) || errObj.message || message;
+        statusCode = errObj.statusCode || errObj.http_code || statusCode;
     }
     // Send response
     res.status(statusCode).json(Object.assign(Object.assign({ success: false, status: statusCode, message }, (errorDetails && { errorDetails })), (isDevelopment && error instanceof Error && { stack: error.stack })));

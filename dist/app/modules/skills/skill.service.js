@@ -21,7 +21,9 @@ const addSkillsIntoDB = (payload) => __awaiter(void 0, void 0, void 0, function*
     return result;
 });
 const getAllSkillDataFromDB = () => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield prisma_1.default.skill.findMany();
+    const result = yield prisma_1.default.skill.findMany({
+        orderBy: { sortOrder: 'asc' },
+    });
     return result;
 });
 const deleteSkillFromDB = (id) => __awaiter(void 0, void 0, void 0, function* () {

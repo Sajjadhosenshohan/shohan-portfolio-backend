@@ -14,6 +14,7 @@ export const globalErrorHandler: ErrorRequestHandler = (
   res: Response,
   _next: NextFunction
 ) => {
+  console.error("GLOBAL ERROR CAUGHT:", error);
   let statusCode = 500;
   let message = "Something went wrong!";
   let errorDetails: any = undefined;
@@ -39,10 +40,14 @@ export const globalErrorHandler: ErrorRequestHandler = (
     statusCode = error.statusCode;
     message = error.message;
   }
-  // Handle Generic Error
+  // Handle Generic Error or Object with message
   else if (error instanceof Error) {
     message = error.message || message;
-    statusCode = (error as any).statusCode || statusCode;
+    statusCode = (error as any).statusCode || (error as any).http_code || statusCode;
+  } else if (error && typeof error === "object") {
+    const errObj = error as any;
+    message = errObj.error?.message || errObj.message || message;
+    statusCode = errObj.statusCode || errObj.http_code || statusCode;
   }
 
   // Send response
