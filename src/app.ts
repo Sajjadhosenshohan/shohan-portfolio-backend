@@ -33,6 +33,7 @@ app.use('/api/v1', router);
 app.get('/', (req: Request, res: Response) => {
   res.send({
     status: true,
+    database: process.env.DATABASE_URL ? `LOADED SUCCESSFULLY ${process.env.DATABASE_URL}` : "NOT LOADED (UNDEFINED)",
     message: 'Shohan portfolio server is running..!',
   });
 });
